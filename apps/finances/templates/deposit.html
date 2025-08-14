@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Fortine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="{% static 'favicon.ico' %}">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	<style>
+		/***** Local layout tweaks for a modern deposit page *****/
+		.deposit-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+		@media (min-width: 1024px) { .deposit-grid { grid-template-columns: 1.1fr 0.9fr; align-items: start; } }
+		.card { background: rgba(255,255,255,0.04); border-radius: 16px; padding: 20px; backdrop-filter: blur(6px); }
+		.card + .card { margin-top: 16px; }
+		.section-title { font-size: 18px; font-weight: 600; margin-bottom: 14px; }
+		.preset-list { display: grid; grid-template-columns: repeat(5, minmax(80px,1fr)); gap: 10px; }
+		@media (max-width: 640px) { .preset-list { grid-template-columns: repeat(3, 1fr); } }
+		.preset-item { display: inline-flex; align-items: center; justify-content: center; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.06); cursor: pointer; transition: .15s; user-select: none; }
+		.preset-item:hover { transform: translateY(-1px); }
+		.preset-item.active { outline: 2px solid #7a5cff; background: rgba(122,92,255,0.15); }
+		.input-row { display: flex; gap: 10px; }
+		.input-row .drop_data_inp { flex: 1; height: 48px; }
+		.pay-methods { display: grid; grid-template-columns: repeat(2, minmax(120px,1fr)); gap: 12px; }
+		@media (min-width: 1280px) { .pay-methods { grid-template-columns: repeat(3, 1fr); } }
+		.method { border-radius: 12px; background: rgba(255,255,255,0.06); padding: 14px; text-align: center; cursor: pointer; transition: .15s; }
+		.method img { height: 28px; margin-bottom: 8px; opacity: .9; }
+		.method.active { outline: 2px solid #7a5cff; background: rgba(122,92,255,0.15); }
+		.summary-row { display: flex; justify-content: space-between; margin: 8px 0; opacity: .9; }
+		.summary-total { display: flex; justify-content: space-between; margin-top: 10px; font-weight: 700; font-size: 18px; }
+		.action-row { display: flex; gap: 12px; align-items: center; }
+		.action-row .drop_mid_confirm { padding: 12px 20px; border-radius: 10px; }
+	</style>
+</head>
+<body>
+	{% include 'partials/header_accounts.html' %}
+	<div class="page">
+		<div class="answers">
+			<!-- <div class="top_bg">
+				<img src="{% static 'img/viol_fon3.svg' %}">
+				<div class="top_block txt_center">
+					<h1>Deposit</h1>
+					<p class="top_block_descr">Add funds to your balance to open more cases</p>
+				</div>
+			</div> -->
+			<div class="answers_block" style="margin-top: 50px;">
+				<div class="contain">
+					<div class="deposit-grid">
+						<div>
+							<div class="card">
+								<div class="section-title">Current balance</div>
+								<div class="balance_block">
+									<div class="balance_row">
+										<div class="balance_val">
+											<div class="balance_val_rev">
+												<div class="balance_wal"><img src="{% static 'img/ico_wallet_wh.svg' %}"></div>
+												<div class="balance_wal_num"><span>Balance</span><div class="acc_summ"><span>$</span> <span class="header_balance">0</span></div></div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="card">
+								<div class="section-title">Choose amount</div>
+								<div class="input-row" style="margin-bottom: 12px;">
+									<input type="number" class="drop_data_inp" name="amount" placeholder="Enter amount (USD)" min="1" step="1">
+									<a href="#" class="drop_mid_confirm" id="use-max" style="white-space:nowrap;">Max</a>
+								</div>
+								<div class="preset-list" id="preset-amounts">
+									<div class="preset-item" data-amount="5">$5</div>
+									<div class="preset-item" data-amount="10">$10</div>
+									<div class="preset-item" data-amount="25">$25</div>
+									<div class="preset-item" data-amount="50">$50</div>
+									<div class="preset-item" data-amount="100">$100</div>
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<div class="card">
+								<div class="section-title">Payment method</div>
+								<div class="pay-methods" id="pay-methods">
+									<div class="method active" data-method="card">
+										<img src="{% static 'img/ico_pl_apple.svg' %}" alt="Card">
+										<div>Bank card</div>
+									</div>
+									<div class="method" data-method="paypal">
+										<img src="{% static 'img/ico_pl_andr.svg' %}" alt="PayPal">
+										<div>PayPal</div>
+									</div>
+									<div class="method" data-method="crypto">
+										<img src="{% static 'img/ico_pl_wind.svg' %}" alt="Crypto">
+										<div>Crypto</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="card">
+								<div class="section-title">Summary</div>
+								<div class="summary-row"><span>Amount</span><span id="sum-amount">$0.00</span></div>
+								<div class="summary-row"><span>Fee</span><span id="sum-fee">$0.00</span></div>
+								<div class="summary-total"><span>Total</span><span id="sum-total">$0.00</span></div>
+								<div class="action-row" style="margin-top:14px;">
+									<a href="#" class="drop_mid_confirm" id="deposit-confirm">Proceed to payment</a>
+									<span class="top_block_descr" style="opacity:.8;">You will be redirected to the payment provider.</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="bg"></div>
+	<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+	<script>
+	(function(){
+		var $amountInput, $presets, $methods, currentMethod = 'card';
+		function format(m){ return '$' + (Number(m||0).toFixed(2)); }
+		function recalc(){
+			var val = Number(($amountInput && $amountInput.value) || 0);
+			var fee = 0; // no fee for now; could be dynamic based on method
+			var total = Math.max(0, val) + fee;
+			document.getElementById('sum-amount').textContent = format(val);
+			document.getElementById('sum-fee').textContent = format(fee);
+			document.getElementById('sum-total').textContent = format(total);
+		}
+		function selectPreset(el){
+			[].slice.call($presets.querySelectorAll('.preset-item')).forEach(function(n){ n.classList.remove('active'); });
+			el.classList.add('active');
+			var val = el.getAttribute('data-amount');
+			if($amountInput) { $amountInput.value = val; }
+			recalc();
+		}
+		function selectMethod(el){
+			[].slice.call($methods.querySelectorAll('.method')).forEach(function(n){ n.classList.remove('active'); });
+			el.classList.add('active');
+			currentMethod = el.getAttribute('data-method');
+		}
+		function init(){
+			$amountInput = document.querySelector('input[name="amount"]');
+			$presets = document.getElementById('preset-amounts');
+			$methods = document.getElementById('pay-methods');
+			if($presets){
+				$presets.addEventListener('click', function(e){ var el = e.target.closest('.preset-item'); if(!el) return; selectPreset(el); });
+			}
+			if($methods){
+				$methods.addEventListener('click', function(e){ var el = e.target.closest('.method'); if(!el) return; selectMethod(el); });
+			}
+			if($amountInput){ $amountInput.addEventListener('input', recalc); }
+			document.getElementById('use-max').addEventListener('click', function(e){ e.preventDefault(); /* future: set max */ });
+			document.getElementById('deposit-confirm').addEventListener('click', function(e){
+				e.preventDefault();
+				var val = Number(($amountInput && $amountInput.value) || 0);
+				if(!val || val < 1){ alert('Please enter a valid amount.'); return; }
+				alert('Redirecting to payment: ' + format(val) + ' via ' + currentMethod + '...');
+			});
+			recalc();
+			// sync current balance from header (already fetched by header script)
+			var hb = document.querySelector('.header_balance');
+			if (hb) {
+				// No-op: balance shown live from header via DOM
+			}
+		}
+		if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
+	})();
+	</script>
+    <script>
+        (function(){
+            async function refreshHeader() {
+                try {
+                    const res = await fetch('/accounts/account-info/', { credentials: 'same-origin' });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (!data || !data.success || !data.user) return;
+                    const user = data.user;
+                    var bal = document.querySelector('.header_balance');
+                    if (bal && user.balance != null) bal.textContent = user.balance;
+                    var nameEl = document.querySelector('.acc_name');
+                    if (nameEl) {
+                        var nick = user.nick_in_game || user.username || user.email || '@user';
+                        nameEl.textContent = nick;
+                    }
+                    if (user.avatar) {
+                        var imgs = document.querySelectorAll('.acc_img img');
+                        imgs.forEach(function(img){ img.src = user.avatar; });
+                    }
+                } catch (e) {
+                    // silent
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', refreshHeader);
+            } else {
+                refreshHeader();
+            }
+        })();
+        </script> 
+</body>
+</html>

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Скины{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Скины</h1>
+    
+    <!-- Фильтры -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2">
+                <select name="case" class="form-select">
+                    <option value="">Все кейсы</option>
+                    {% for case in cases %}
+                    <option value="{{ case.id }}" {% if request.GET.case == case.id|stringformat:"s" %}selected{% endif %}>
+                        {{ case.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="rarity" class="form-select">
+                    <option value="">Все редкости</option>
+                    {% for value, label in rarity_choices %}
+                    <option value="{{ value }}" {% if request.GET.rarity == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+                
+                <button type="submit" class="btn btn-primary">Фильтровать</button>
+                {% if request.GET.case or request.GET.rarity %}
+                <a href="{% url 'skins:skin_list' %}" class="btn btn-secondary">Сбросить</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for skin in skins %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100">
+                {% if skin.image %}
+                <img src="{{ skin.image.url }}" class="card-img-top" alt="{{ skin.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span class="text-white">Нет изображения</span>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ skin.name }}</h5>
+                    <p class="card-text">
+                        <strong>Кейс:</strong> 
+                        <a href="{% url 'cases:case_detail' skin.case.pk %}">{{ skin.case.name }}</a>
+                    </p>
+                    <p class="card-text">
+                        <span class="badge bg-{% if skin.rarity == 'legendary' %}warning{% elif skin.rarity == 'epic' %}danger{% elif skin.rarity == 'rare' %}primary{% elif skin.rarity == 'uncommon' %}info{% else %}secondary{% endif %}">
+                            {{ skin.get_rarity_display }}
+                        </span>
+                    </p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Шанс выпадения: {{ skin.get_drop_percentage }}%
+                        </small>
+                    </p>
+                    <a href="{% url 'skins:skin_detail' skin.pk %}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">Скины не найдены</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if is_paginated %}
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.case %}&case={{ request.GET.case }}{% endif %}{% if request.GET.rarity %}&rarity={{ request.GET.rarity }}{% endif %}">Предыдущая</a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.case %}&case={{ request.GET.case }}{% endif %}{% if request.GET.rarity %}&rarity={{ request.GET.rarity }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.case %}&case={{ request.GET.case }}{% endif %}{% if request.GET.rarity %}&rarity={{ request.GET.rarity }}{% endif %}">Следующая</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %} 

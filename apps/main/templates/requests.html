@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Fortine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="{% static 'favicon.ico' %}">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	<style>
+		.group { margin-bottom: 28px; }
+		.group-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+		.win-list { display: grid; gap: 10px; }
+		.win-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 12px; align-items: center; background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 12px; }
+		@media (max-width: 900px) { .win-row { grid-template-columns: 1fr; } }
+		.win-row .who { display: flex; align-items: center; gap: 10px; }
+		.win-row img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,0.08); }
+		.win-hd { opacity: .8; font-weight: 600; background: transparent; }
+		.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+		.filters .drop_data_inp { height: 42px; }
+		.badge { padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,0.08); font-size: 12px; }
+	</style>
+</head>
+<body>
+	{% include 'partials/header_accounts.html' %}
+	<div class="page">
+		<div class="answers">
+			<div class="answers_block" style="margin-top: 40px;">
+				<div class="contain">
+					<div class="price_block mrgb120">
+						<p class="price_list_hd">Latest wins <a href="/django-admin/" style="font-size:14px; opacity:.8; margin-left:10px;">Go to admin</a></p>
+						<div class="filters">
+							<input type="date" class="drop_data_inp" id="fromDate" placeholder="From">
+							<input type="date" class="drop_data_inp" id="toDate" placeholder="To">
+							<input type="text" class="drop_data_inp" id="search" placeholder="Search by user or skin">
+							<a href="#" class="drop_mid_confirm" id="apply">Apply</a>
+						</div>
+						<div id="wins-container">
+							<!-- Groups injected here by JS -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="bg"></div>
+	<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+	<script>
+	(function(){
+		function groupByDate(items){
+			const map = {};
+			items.forEach(i=>{ const d = (i.date || '').slice(0,10); if(!map[d]) map[d]=[]; map[d].push(i); });
+			return Object.entries(map).sort((a,b)=> b[0].localeCompare(a[0]));
+		}
+		function render(groups){
+			const root = document.getElementById('wins-container');
+			root.innerHTML = '';
+			groups.forEach(([date, rows])=>{
+				const group = document.createElement('div');
+				group.className = 'group';
+				group.innerHTML = `<div class="group-title">${date}</div>`;
+				const list = document.createElement('div');
+				list.className = 'win-list';
+				const head = document.createElement('div');
+				head.className = 'win-row win-hd';
+				head.innerHTML = '<div>User</div><div>Skin</div><div>Case</div><div>Time</div>';
+				list.appendChild(head);
+				rows.forEach(r=>{
+					const row = document.createElement('div');
+					row.className = 'win-row';
+					row.innerHTML = `
+						<div class="who"><img src="${r.avatar || '/static/img/empty_avatar.svg'}" alt=""><div>${r.user}</div></div>
+						<div>${r.skin}</div>
+						<div>${r.case_name || ''}</div>
+						<div>${(r.date || '').slice(11,19)}</div>
+					`;
+					list.appendChild(row);
+				});
+				group.appendChild(list);
+				root.appendChild(group);
+			});
+		}
+		async function load(){
+			const params = new URLSearchParams();
+			const f = document.getElementById('fromDate').value; if(f) params.set('from', f);
+			const t = document.getElementById('toDate').value; if(t) params.set('to', t);
+			const q = document.getElementById('search').value.trim(); if(q) params.set('q', q);
+			const res = await fetch('/api/skins/wins/?' + params.toString(), { credentials: 'same-origin' });
+			if(!res.ok){ alert('Unauthorized or error'); return; }
+			const data = await res.json();
+			render(groupByDate(data.results || []));
+		}
+		document.getElementById('apply').addEventListener('click', function(e){ e.preventDefault(); load(); });
+		if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', load); } else { load(); }
+	})();
+	</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	{% load static %}
+	<title>Fortine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="{% static 'favicon.ico' %}">
+	
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	
+</head>
+<body>
+	<header class="contain">
+		<div class="header_left">
+			<a href="/" class="logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+			<a href="/" class="menu_item">Homepage</a>
+			<a href="{% url 'answers' %}" class="menu_item">Question & Answer</a>
+		</div>
+		<div class="header_right">
+			<a href="#" class="bt_login" id="auth-button">LOGIN</a>
+		</div>
+	</header>
+	<div class="page">
+		<div class="answers">
+			<div class="top_bg">
+				<img src="{% static 'img/answers_bg.jpg' %}">
+				<div class="top_block">
+					<h1>Questions and answers</h1>
+					<p class="top_block_descr">Comece sua equipe ou entre em uma para participar e apareça para o mundo ver seu potencial</p>
+					<a href="" class="top_bt viol_bt">Criar torneio</a>
+				</div>
+			</div>
+			<div class="answers_block">
+				<div class="contain">
+					{% if faqs %}
+						{% for faq in faqs %}
+							<div class="answers_item">
+								<div class="answers_row">
+									<p>{{ faq.question }}</p>
+									<span class="answer_plus"></span>
+								</div>
+								<div class="answer_txt">{{ faq.answer|linebreaksbr }}</div>
+							</div>
+						{% endfor %}
+					{% else %}
+						<p style="text-align:center; opacity:0.7;">No questions yet.</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="bg"></div>
+	<div class="login_popup popup_block">
+		<p class="login_pup_hd">Log in or register to <br>your account</p>
+		<form name="login_form">
+			<p class="form_inp_hd">Enter your email address</p>
+			<div class="chgname_inprow">
+				<input type="email" class="drop_data_inp" name="email" placeholder="example@example.com">
+				<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+				<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+				<div class="error-message" style="display: none;"></div>
+			</div>
+			<p class="form_inp_hd">Enter your password</p>
+			<div class="chgname_inprow password-field">
+				<input type="password" class="drop_data_inp" name="password" placeholder="********">
+				<button type="button" class="password-toggle" aria-label="Toggle password visibility">
+					<img src="{% static 'img/ico_eye.svg' %}" class="eye-icon">
+				</button>
+				<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+				<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+				<div class="error-message" style="display: none;"></div>
+			</div>
+			<p class="form_inp_hd">Enter your username</p>
+			<div class="chgname_inprow">
+				<input type="text" class="drop_data_inp" name="name" placeholder="@game37op1">
+				<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+				<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+				<div class="error-message" style="display: none;"></div>
+			</div>
+			<p class="form_inp_hd">Сhoose your platform</p>
+			<div class="platform_list">
+				<span class="platform_item"><img src="{% static 'img/ico_pl_ps.svg' %}"></span>
+				<span class="platform_item"><img src="{% static 'img/ico_pl_xb.svg' %}"></span>
+				<span class="platform_item"><img src="{% static 'img/ico_pl_nint.svg' %}"></span>
+				<span class="platform_item"><img src="{% static 'img/ico_pl_apple.svg' %}"></span>
+				<span class="platform_item"><img src="{% static 'img/ico_pl_wind.svg' %}"></span>
+				<span class="platform_item"><img src="{% static 'img/ico_pl_andr.svg' %}"></span>
+			</div>
+			<div class="form-error" style="display: none;"></div>
+			<div class="form-success" style="display: none;"></div>
+			<a href="" class="drop_mid_confirm">Confirm</a>
+		</form>
+	</div>
+	
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
+
+</body>
+</html>

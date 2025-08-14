@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Fortine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="{% static 'img/favicon.ico' %}">
+	
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	
+</head>
+<body class="opencase_page">
+	{% include 'partials/header_accounts.html' %}
+	<div class="page">
+		<div class="acc_block contain">
+			<div class="acc_left">
+				<div class="acc_info">
+					<div class="acc_info_data">
+						<div class="acc_info_img"><img src="{% static 'img/acc_avatar.png' %}" class="profile-avatar"></div>
+						<div class="acc_info_pers">
+							<p class="pers_name user-email">Loading...</p>
+							<p class="pers_nick">Your Fortnite Nickname: <span class="user_nickname">Not set</span> <a id="change_nick" href="#"><img src="{% static 'img/ico_pencil.svg' %}"></a></p>
+							<p class="pers_regdate">Registration date: <span class="user_regdate">Loading...</span></p>
+						</div>
+					</div>
+					<a href="/" class="acc_info_logout"><img src="{% static 'img/ico_info_out.svg' %}"></a>
+				</div>
+				<div class="acc_profav">
+					<div class="acc_profav_left">
+						<div class="acc_profav_img"><img src="{% static 'img/empty_avatar.svg' %}" class="profile-avatar-small"></div>
+						<p>Install profile avatar</p>
+					</div>
+					<label for="avatar-upload" class="acc_avatar_load">
+						<img src="{% static 'img/ico_upload.svg' %}"> Upload
+					</label>
+					<input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+				</div>
+			</div>
+			<div class="acc_right">
+				<div class="balance_block">
+					<div class="balance_row">
+						<div class="balance_val">
+							<div class="balance_val_rev">
+								<div class="balance_wal"><img src="{% static 'img/ico_wallet_wh.svg' %}"></div>
+								<div class="balance_wal_num"><span>Balance</span><p class="balance_money">0 $</p></div>
+							</div>
+						</div>
+						<a href="{% url 'finances:deposit' %}" class="bt_deposit"><img src="{% static 'img/ico_deposit.svg' %}">Deposit</a>
+					</div>
+				</div>
+				<div class="withdr_hist">
+					<div class="wh_rval">
+						<div class="wh_row">
+							<img src="{% static 'img/ico_withdr.svg' %}"> <p><a href="{% url 'finances:history' %}">Withdrawal history</a></p> <span class="wh_num">0</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="skin_block wh">
+			<div class="contain">
+				<div class="wh_skin">
+					<div class="case_list">
+						<!-- Skins will be loaded dynamically via JavaScript -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="bg"></div>
+	<div class="chgname_popup popup_block" style="display: none;">
+		<p>Change your nickname in Fortnite</p>
+		<div class="chgname_inprow">
+			<input type="text" class="drop_data_inp" name="new_name" placeholder="@username (2-19 characters, alphanumeric and underscore only)" maxlength="20"> 
+			<span style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+		</div>
+		<a href="#" class="drop_mid_confirm">Confirm</a>
+	</div>
+
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
+<script src="{% static 'js/account.js' %}"></script>
+
+</body>
+</html> 

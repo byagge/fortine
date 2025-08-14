@@ -1,0 +1,53 @@
+{% load static %}
+<header class="contain">
+	<div class="header_left">
+		<a href="/" class="logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+		<a href="/" class="menu_item">Homepage</a>
+		<a href="{% url 'answers' %}" class="menu_item">Question & Answer</a>
+	</div>
+	<div class="header_right">
+		<div class="header_money">
+			<div class="acc_summ"><span>$</span> <span class="header_balance">0</span></div>
+			<div class="acc_pay"><a href="{% url 'finances:deposit' %}"><img src="{% static 'img/ico_wallet.svg' %}"></a></div>
+			<div class="hd_line onmob"></div>
+			<div class="acc_img onmob"><img src="{% static 'img/acc_img.png' %}"></div>
+		</div>
+		<div class="header_acc">
+			<div class="acc_img"><img src="{% static 'img/acc_img.png' %}"></div>
+			 <a href="{% url 'account' %}"><span class="acc_name">@user</span></a>
+			<a href="{% url 'logout' %}" class="acc_logout"><img src="{% static 'img/ico_logout.svg' %}"></a>
+		</div>
+		<div class="mob_bt"><img src="{% static 'img/ico_mobmenu.svg' %}"></div>
+	</div>
+</header> 
+<script>
+(function(){
+	async function refreshHeader() {
+		try {
+			const res = await fetch('/accounts/account-info/', { credentials: 'same-origin' });
+			if (!res.ok) return;
+			const data = await res.json();
+			if (!data || !data.success || !data.user) return;
+			const user = data.user;
+			var bal = document.querySelector('.header_balance');
+			if (bal && user.balance != null) bal.textContent = user.balance;
+			var nameEl = document.querySelector('.acc_name');
+			if (nameEl) {
+				var nick = user.nick_in_game || user.username || user.email || '@user';
+				nameEl.textContent = nick;
+			}
+			if (user.avatar) {
+				var imgs = document.querySelectorAll('.acc_img img');
+				imgs.forEach(function(img){ img.src = user.avatar; });
+			}
+		} catch (e) {
+			// silent
+		}
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', refreshHeader);
+	} else {
+		refreshHeader();
+	}
+})();
+</script> 

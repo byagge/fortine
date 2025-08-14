@@ -1,0 +1,156 @@
+{% load static %}   
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Fortine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="{% static 'img/favicon.ico' %}">
+		
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	<style>
+		/* Ensure items in scroller are visible */
+		#case-scroll { overflow: hidden; }
+		#case-strip { display: flex; gap: 12px; align-items: center; }
+		#case-strip .ocase_scroll_item { width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; }
+		#case-strip .ocase_scroll_item img { max-width: 100%; max-height: 100%; object-fit: contain; }
+	</style>
+</head>
+<body class="opencase_page" data-case-id="{{ case.id|default:'null' }}">
+	{% include 'partials/header_accounts.html' %}
+	<div class="page">
+		<div class="opencase">
+			<div class="ocase_scroll_block">
+				<div class="ocase_window"><img src="{% static 'img/ocase_window.png' %}"></div>
+				<div class="ocase_ardnw"></div>
+					<div class="ocase_scroll" id="case-scroll">
+						<div class="ocase_strip" id="case-strip"></div>
+					</div>
+				<div class="ocase_arup"></div>
+			</div>
+			<div class="opencase_botoom">
+				<span class="price_item_cost" id="case-price">${{ case.price|default:"0.00" }}</span>
+				<a class="open-case-btn" id="open-case-btn" onclick="checkBalanceAndOpen()">
+					<img src="{% static 'img/open_case.svg' %}">
+                </a>
+			</div>
+		</div>
+		<div class="skin_block">
+			<div class="hd_block">Skin in this case</div>
+			<div class="contain">
+				<div class="case_list" id="skins-list">
+					<!-- Скины будут загружены через API -->
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
+<script>
+// Безопасно получаем ID кейса из data-атрибута
+let currentCaseId = (function() {
+	const v = document.body.dataset.caseId;
+	return v && v !== 'null' ? parseInt(v, 10) : null;
+})();
+let casePrice = 0;
+
+// Редирект на страницу крутящегося кейса
+function checkBalanceAndOpen() {
+	if (!currentCaseId) return;
+	window.location.href = '{% url 'cases:scrollcase' %}?case_id=' + currentCaseId;
+}
+
+// Загрузка данных кейса
+async function loadCaseData() {
+	if (currentCaseId) {
+		try {
+			// Получаем данные кейса
+			const caseResponse = await fetch(`/api/cases/cases/${currentCaseId}/`);
+			const caseData = await caseResponse.json();
+			
+			// Обновляем цену кейса
+			document.getElementById('case-price').textContent = `$${caseData.price}`;
+			casePrice = Number(caseData.price) || 0;
+			
+			// Загружаем скины для этого кейса
+			await loadCaseSkins();
+		} catch (error) {
+			console.error('Error loading case data:', error);
+		}
+	}
+}
+
+// Загрузка скинов кейса
+async function loadCaseSkins() {
+	if (!currentCaseId) return;
+	
+	try {
+		const skinsResponse = await fetch(`/api/cases/cases/${currentCaseId}/skins/`);
+		const skins = await skinsResponse.json();
+		
+		// Обновляем список скинов в блоке "Skin in this case"
+		const skinsList = document.getElementById('skins-list');
+		skinsList.innerHTML = '';
+		skins.forEach(skin => {
+			const skinDiv = document.createElement('div');
+			skinDiv.className = `case_item item_${getRarityClass(skin.rarity)}`;
+			skinDiv.innerHTML = `
+				<div class="item_top_plank"></div>
+				<p class="item_mod">${skin.name}</p>
+				<p class="item_name">${skin.case_name}</p>
+				<p class="item_descr">${getRarityLabel(skin.rarity)}</p>
+				<div class="item_img">
+					${skin.image ? `<img src="${skin.image}" alt="${skin.name}">` : '<img src="/static/img/akr_sport_60.png">'}
+				</div>
+			`;
+			skinsList.appendChild(skinDiv);
+		});
+
+		// Обновляем скроллер вверху
+		updateCaseScroll(skins);
+	} catch (error) {
+		console.error('Error loading skins:', error);
+	}
+}
+
+function updateCaseScroll(skins) {
+	const strip = document.getElementById('case-strip');
+	strip.innerHTML = '';
+	skins.forEach(skin => {
+		const el = document.createElement('div');
+		el.className = 'ocase_scroll_item';
+		el.innerHTML = skin.image ? `<img src="${skin.image}" alt="${skin.name}">` : '<img src="img/ocase_item.png">';
+		strip.appendChild(el);
+	});
+}
+
+function getRarityClass(rarity) {
+	const rarityMap = {
+		'common': 'blue',
+		'uncommon': 'blue',
+		'rare': 'pink',
+		'epic': 'pink',
+		'legendary': 'yel'
+	};
+	return rarityMap[rarity] || 'blue';
+}
+
+function getRarityLabel(rarity) {
+	const rarityMap = {
+		'common': 'Common',
+		'uncommon': 'Uncommon',
+		'rare': 'Rare',
+		'epic': 'Epic',
+		'legendary': 'Legendary'
+	};
+	return rarityMap[rarity] || 'Common';
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', loadCaseData);
+</script>
+
+</body>
+</html>

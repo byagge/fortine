@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ skin.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            {% if skin.image %}
+            <img src="{{ skin.image.url }}" class="img-fluid rounded" alt="{{ skin.name }}">
+            {% else %}
+            <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                <span class="text-white">Нет изображения</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+            <h1>{{ skin.name }}</h1>
+            
+            <div class="mb-3">
+                <span class="badge bg-{% if skin.rarity == 'legendary' %}warning{% elif skin.rarity == 'epic' %}danger{% elif skin.rarity == 'rare' %}primary{% elif skin.rarity == 'uncommon' %}info{% else %}secondary{% endif %} fs-5">
+                    {{ skin.get_rarity_display }}
+                </span>
+            </div>
+            
+            <p class="lead">
+                <strong>Кейс:</strong> 
+                <a href="{% url 'cases:case_detail' skin.case.pk %}">{{ skin.case.name }}</a>
+            </p>
+            
+            <p class="lead">
+                <strong>Шанс выпадения:</strong> {{ skin.get_drop_percentage }}%
+            </p>
+            
+            <p class="text-muted">
+                <small>Создан: {{ skin.created_at|date:"d.m.Y H:i" }}</small>
+            </p>
+            
+            <div class="mt-4">
+                <h4>Информация о редкости</h4>
+                <p>
+                    {% if skin.rarity == 'legendary' %}
+                    Легендарные скины - самые редкие и ценные предметы в игре. Шанс их выпадения крайне низок.
+                    {% elif skin.rarity == 'epic' %}
+                    Эпические скины - очень редкие предметы с высоким шансом выпадения.
+                    {% elif skin.rarity == 'rare' %}
+                    Редкие скины - нечасто встречающиеся предметы со средним шансом выпадения.
+                    {% elif skin.rarity == 'uncommon' %}
+                    Необычные скины - предметы с повышенным шансом выпадения.
+                    {% else %}
+                    Обычные скины - базовые предметы с высоким шансом выпадения.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Другие скины из этого кейса</h3>
+            <div class="row">
+                {% for other_skin in skin.case.skins.all|slice:":4" %}
+                {% if other_skin != skin %}
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card h-100">
+                        {% if other_skin.image %}
+                        <img src="{{ other_skin.image.url }}" class="card-img-top" alt="{{ other_skin.name }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 150px;">
+                            <span class="text-white">Нет изображения</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">{{ other_skin.name }}</h6>
+                            <p class="card-text">
+                                <span class="badge bg-{% if other_skin.rarity == 'legendary' %}warning{% elif other_skin.rarity == 'epic' %}danger{% elif other_skin.rarity == 'rare' %}primary{% elif other_skin.rarity == 'uncommon' %}info{% else %}secondary{% endif %}">
+                                    {{ other_skin.get_rarity_display }}
+                                </span>
+                            </p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    Шанс: {{ other_skin.get_drop_percentage }}%
+                                </small>
+                            </p>
+                            <a href="{% url 'skins:skin_detail' other_skin.pk %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'skins:skin_list' %}" class="btn btn-secondary">← Назад к списку скинов</a>
+            <a href="{% url 'cases:case_detail' skin.case.pk %}" class="btn btn-primary">Открыть кейс</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

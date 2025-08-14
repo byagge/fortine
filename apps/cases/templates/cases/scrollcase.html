@@ -1,0 +1,627 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Fortine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="favicon.ico">
+	
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	<style>
+		@keyframes spin {
+			0% { transform: translateX(0); }
+			100% { transform: translateX(-1000px); }
+		}
+		
+		@keyframes spinFast {
+			0% { transform: translateX(0); }
+			100% { transform: translateX(-2000px); }
+		}
+		
+		.case-spinning {
+			animation: spin 3s ease-out forwards;
+		}
+		
+		.case-spinning-fast {
+			animation: spinFast 0.5s ease-out forwards;
+		}
+		
+		.winner-highlight {
+			background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+			animation: winnerPulse 2s ease-in-out infinite;
+		}
+		
+		@keyframes winnerPulse {
+			0%, 100% { transform: scale(1); }
+			50% { transform: scale(1.1); }
+		}
+		
+		/* Исправляем размер изображений в крутящемся кейсе */
+		.ocase_scroll_item {
+			height: 100% !important;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+		}
+		
+		.ocase_scroll_item img {
+			height: 100% !important;
+			width: auto !important;
+			max-width: 100% !important;
+			object-fit: contain !important;
+		}
+		
+		/* Полоса элементов внутри окна кейса */
+		:root {
+			--case-item-size: 180px;
+			--case-gap: 12px;
+		}
+		#case-scroll {
+			height: var(--case-item-size);
+			overflow: hidden;
+		}
+		.ocase_strip {
+			display: flex;
+			gap: var(--case-gap);
+			will-change: transform;
+		}
+		.ocase_scroll_item {
+			min-width: var(--case-item-size) !important;
+			height: var(--case-item-size) !important;
+		}
+		.ocase_scroll_item img {
+			width: 100% !important;
+			height: 100% !important;
+			object-fit: contain !important;
+		}
+	</style>
+</head>
+<body class="opencase_page" data-case-id="{{ case.id|default:'null' }}">
+	{% include 'partials/header_accounts.html' %}
+	<div class="page">
+		<div class="opencase">
+			<div class="ocase_scroll_block">
+				<div class="ocase_window"><img src="{% static 'img/ocase_window.png' %}"></div>
+				<div class="ocase_ardnw"></div>
+					<div class="ocase_scroll" id="case-scroll">
+						<div class="ocase_strip" id="case-strip"></div>
+					</div>
+				<div class="ocase_arup"></div>
+			</div>
+			<div class="opencase_botoom">
+				<span class="price_item_cost" id="case-price">${{ case.price|default:"0.00" }}</span>
+				<a class="open-case-btn" id="open-case-btn" onclick="openCase()">
+					<img src="{% static 'img/open_case.svg' %}">
+				</a>
+			</div>
+		</div>
+		<div class="skin_block">
+			<div class="hd_block">Skin in this case</div>
+			<div class="contain">
+				<div class="case_list" id="skins-list">
+					<!-- Скины будут загружены через API -->
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="bg"></div>
+	<div class="drop_popup popup_block" id="drop-popup">
+		<div class="drop_top">
+			<div class="drop_top_hd">You're lucky</div>
+			<div class="drop_top_img">
+				<img id="won-skin-image" src="{% static 'img/awm_phoenix.png' %}">
+				<div class="drop_top_txt">
+					<p class="drop_top_mod" id="won-skin-name">M4A1-S</p>
+					<p class="drop_top_name" id="won-skin-rarity">Nightmare</p>
+				</div>
+			</div>
+		</div>
+		<div class="drop_mid">
+			<div class="drop_mid_hd">In order to get your skin.</div>
+			<p class="drop_mid_descr">Open Fortnite and go to friends section. <br>In search enter nickname below and submit a request.</p>
+			<div class="drop_mid_data">
+				<input type="text" class="drop_data_inp" value="@game37op1"> <a href="#" class="drop_data_bt">add to friends</a>
+			</div>
+			<a href="#" class="drop_mid_confirm">Confirm</a>
+		</div>
+		<div class="drop_bot">
+			<div class="drop_bot_wrap">
+				<div class="drop_bot_hd">Wait 48 hours and we will <br>send you skin</div>
+				<p class="drop_bot_descr">When you receive skin, we will send you a email</p>
+				<div class="drop_bot_time" id="drop-bot-time">48:00:00</div>
+			</div>
+		</div>
+	</div>
+
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
+<script>
+// Проверка авторизации на стороне клиента (быстрая)
+(function checkAuth() {
+	// Если в контексте Django доступен request.user, используем его
+	// Иначе fallback на cookie/session маркеры
+	try {
+		var isAuthenticatedStr = "{{ request.user.is_authenticated|yesno:'true,false' }}";
+		var isAuthenticated = (isAuthenticatedStr === 'true');
+		if (!isAuthenticated) {
+			alert('To open the case, you need to log in.');
+			window.location.href = '/';
+		}
+	} catch (e) {
+		// В случае отсутствия контекста — мягкая проверка по cookie (например, sessionid)
+		if (!document.cookie || document.cookie.indexOf('sessionid=') === -1) {
+			alert('To open the case, you need to log in.');
+			window.location.href = '/';
+		}
+	}
+})();
+
+// Получаем ID кейса из data-атрибута, чтобы избежать ошибок линтера
+let currentCaseId = (function() {
+	const val = document.body.dataset.caseId;
+	return val && val !== 'null' ? parseInt(val, 10) : null;
+})();
+let caseSkins = [];
+let isSpinning = false;
+let userBalance = 4700; // Текущий баланс пользователя
+
+// Состояние и параметры спина (современная анимация)
+const spinState = {
+	rafId: null,
+	startTs: 0,
+	lastTs: 0,
+	currentX: 0,
+	speedPxPerSec: 0,
+	maxSpeed: 7000, // очень быстро крутится
+	accelDurationMs: 700, // быстрый, но плавный старт ~0.7с
+	totalDurationMs: 8000, // суммарно ~8с
+	decelAnimation: null,
+	isDecelerating: false,
+	extendedSkinsData: [], // последовательность id скинов в ленте (устар.)
+	extendedSlots: [], // последовательность метаданных слотов { idNum, name, imageUrl }
+	itemWidth: 0
+};
+
+function normalizeIdLike(value) {
+	if (value === undefined || value === null) return null;
+	const n = Number(value);
+	return Number.isFinite(n) ? n : null;
+}
+function normalizeName(value) {
+	return (value || '').toString().trim().toLowerCase();
+}
+function normalizeImageUrl(value) {
+	if (!value) return '';
+	try {
+		const u = new URL(value, window.location.origin);
+		return u.pathname; // игнорируем домен/квери
+	} catch (e) {
+		return value.split('?')[0];
+	}
+}
+
+function getCssVarNumber(varName, fallback) {
+	const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(varName));
+	return Number.isFinite(v) ? v : fallback;
+}
+
+function beginPreSpin() {
+	const strip = document.getElementById('case-strip');
+	cancelAnimationFrame(spinState.rafId);
+	if (spinState.decelAnimation) spinState.decelAnimation.cancel();
+	spinState.startTs = performance.now();
+	spinState.lastTs = spinState.startTs;
+	spinState.speedPxPerSec = 0;
+	spinState.currentX = 0;
+	strip.style.transform = 'translateX(0)';
+
+	const loop = (ts) => {
+		const dt = (ts - spinState.lastTs) / 1000;
+		const elapsed = ts - spinState.startTs;
+		spinState.lastTs = ts;
+
+		// Плавное ускорение к максимальной скорости
+		const accelProgress = Math.min(1, elapsed / spinState.accelDurationMs);
+		const targetSpeed = spinState.maxSpeed * accelProgress;
+		// Плавное приближение скорости к целевой
+		spinState.speedPxPerSec += (targetSpeed - spinState.speedPxPerSec) * 0.15;
+
+		spinState.currentX += spinState.speedPxPerSec * dt;
+		strip.style.transform = `translateX(${-spinState.currentX}px)`;
+
+		spinState.rafId = requestAnimationFrame(loop);
+	};
+	spinState.rafId = requestAnimationFrame(loop);
+}
+
+function stopSpinImmediate() {
+	cancelAnimationFrame(spinState.rafId);
+	const strip = document.getElementById('case-strip');
+	if (spinState.decelAnimation) spinState.decelAnimation.cancel();
+	strip.style.transform = `translateX(${-spinState.currentX}px)`;
+}
+
+function scheduleDecelerationToWin(skin) {
+	return new Promise((resolve) => {
+		const strip = document.getElementById('case-strip');
+		const now = performance.now();
+		const elapsed = now - spinState.startTs;
+		const minDecelMs = 1800; // плавная остановка не короче 1.8с
+		const duration = Math.max(minDecelMs, spinState.totalDurationMs - elapsed);
+
+		const caseScroll = document.getElementById('case-scroll');
+		const viewportCenter = caseScroll.clientWidth / 2;
+		const traveledCenterX = spinState.currentX + viewportCenter;
+		const currentIndex = Math.floor(traveledCenterX / spinState.itemWidth);
+
+		// Планируем целевой индекс впереди текущего на фиксированное число слотов
+		const minItemsAhead = 12;
+		let idxTarget = currentIndex + minItemsAhead;
+
+		// Гарантируем, что лента достаточно длинная
+		const itemsPerCycle = Math.max(1, (caseSkins || []).length);
+		if (idxTarget >= spinState.extendedSlots.length - 1) {
+			const need = (idxTarget + 5) - spinState.extendedSlots.length;
+			if (need > 0) {
+				for (let r = 0; r < Math.ceil(need / itemsPerCycle) + 1; r++) {
+					(caseSkins || []).forEach(s => {
+						const el = document.createElement('div');
+						el.className = 'ocase_scroll_item';
+						const idNum2 = normalizeIdLike(s.id);
+						el.dataset.skinId = idNum2 !== null ? String(idNum2) : String(s.id || '');
+														el.innerHTML = s.image ? `<img src="${s.image}" alt="${s.name}">` : '<img src="/static/img/ocase_item.png">';
+						spinState.extendedSlots.push({ idNum: idNum2, name: s.name || '', imageUrl: s.image || '' });
+						strip.appendChild(el);
+					});
+									}
+					}
+				}
+
+				// Жестко подменяем слот по целевому индексу на выигрышной элемент
+		const winId = normalizeIdLike(skin.id || skin.pk || skin.skin_id);
+		const targetEl = strip.children[idxTarget];
+		if (targetEl) {
+			targetEl.dataset.skinId = winId !== null ? String(winId) : '';
+			targetEl.innerHTML = skin.image ? `<img src="${skin.image}" alt="${skin.name || ''}">` : '<img src="/static/img/ocase_item.png">';
+			spinState.extendedSlots[idxTarget] = { idNum: winId, name: skin.name || '', imageUrl: skin.image || '' };
+		} else {
+			// На всякий случай, если элемента нет (не должно случиться)
+			const winnerEl = document.createElement('div');
+			winnerEl.className = 'ocase_scroll_item';
+			if (winId !== null) winnerEl.dataset.skinId = String(winId);
+			winnerEl.innerHTML = skin.image ? `<img src="${skin.image}" alt="${skin.name || ''}">` : '<img src="/static/img/ocase_item.png">';
+			spinState.extendedSlots.push({ idNum: winId, name: skin.name || '', imageUrl: skin.image || '' });
+			strip.appendChild(winnerEl);
+			idxTarget = spinState.extendedSlots.length - 1;
+		}
+
+		// Координаты центра целевого элемента и плавная остановка
+		const targetCenterX = idxTarget * spinState.itemWidth + spinState.itemWidth / 2;
+		const targetTranslate = Math.max(0, targetCenterX - viewportCenter);
+
+		cancelAnimationFrame(spinState.rafId);
+		spinState.isDecelerating = true;
+		spinState.decelAnimation = strip.animate(
+			[
+				{ transform: `translateX(${-spinState.currentX}px)` },
+				{ transform: `translateX(${-targetTranslate}px)` }
+			],
+			{
+				duration: duration,
+				easing: 'cubic-bezier(0.05, 0.7, 0.25, 1)',
+				fill: 'forwards'
+			}
+		);
+		spinState.decelAnimation.onfinish = () => {
+			strip.style.transform = `translateX(${-targetTranslate}px)`;
+			spinState.currentX = targetTranslate;
+			spinState.isDecelerating = false;
+			showWinningSkin(skin);
+			resolve();
+		};
+	});
+}
+
+// Функция для загрузки данных кейса
+async function loadCaseData() {
+	if (currentCaseId) {
+		try {
+			// Получаем данные кейса
+			const caseResponse = await fetch(`/api/cases/cases/${currentCaseId}/`);
+			const caseData = await caseResponse.json();
+			
+			// Обновляем цену кейса
+			document.getElementById('case-price').textContent = `$${caseData.price}`;
+			
+			// Загружаем скины для этого кейса
+			await loadCaseSkins();
+		} catch (error) {
+			console.error('Error loading case data:', error);
+		}
+	}
+}
+
+// Функция для загрузки скинов кейса
+async function loadCaseSkins() {
+	if (!currentCaseId) return;
+	
+	try {
+		const skinsResponse = await fetch(`/api/cases/cases/${currentCaseId}/skins/`);
+		caseSkins = await skinsResponse.json();
+		
+		// Обновляем список скинов в блоке "Skin in this case"
+		updateSkinsList(caseSkins);
+		
+		// Обновляем скролл кейса
+		updateCaseScroll(caseSkins);
+		
+	} catch (error) {
+		console.error('Error loading skins:', error);
+	}
+}
+
+// Функция для обновления списка скинов
+function updateSkinsList(skins) {
+	const skinsList = document.getElementById('skins-list');
+	skinsList.innerHTML = '';
+	
+	skins.forEach(skin => {
+		const skinElement = createSkinElement(skin);
+		skinsList.appendChild(skinElement);
+	});
+}
+
+// Функция для создания элемента скина
+function createSkinElement(skin) {
+	const skinDiv = document.createElement('div');
+	skinDiv.className = `case_item item_${getRarityClass(skin.rarity)}`;
+	
+	skinDiv.innerHTML = `
+		<div class="item_top_plank"></div>
+		<p class="item_mod">${skin.name}</p>
+		<p class="item_name">${skin.case_name}</p>
+		<p class="item_descr">${getRarityLabel(skin.rarity)}</p>
+						<div class="item_img">
+					${skin.image ? `<img src="${skin.image}" alt="${skin.name}">` : '<img src="/static/img/akr_sport_60.png">'}
+				</div>
+	`;
+	
+	return skinDiv;
+}
+
+// Функция для обновления скролла кейса
+function updateCaseScroll(skins) {
+	const caseStrip = document.getElementById('case-strip');
+	caseStrip.innerHTML = '';
+	spinState.extendedSkinsData = [];
+	spinState.extendedSlots = [];
+
+	// Вычисляем ширину элемента с учетом gap
+	const itemSize = getCssVarNumber('--case-item-size', 180);
+	const gap = getCssVarNumber('--case-gap', 12);
+	spinState.itemWidth = itemSize + gap;
+
+	// Оценка необходимой длины ленты под быструю прокрутку ~8с
+	const estimatePathPx = spinState.maxSpeed * (spinState.totalDurationMs / 1000) * 1.15; // небольшой запас
+	const minItemsNeeded = Math.ceil(estimatePathPx / spinState.itemWidth) + 40; // буфер
+	const repeats = Math.max(30, Math.ceil(minItemsNeeded / skins.length));
+
+	for (let i = 0; i < repeats; i++) {
+		skins.forEach(skin => {
+			const scrollItem = document.createElement('div');
+			scrollItem.className = 'ocase_scroll_item';
+			const idNum = normalizeIdLike(skin.id);
+			scrollItem.dataset.skinId = idNum !== null ? String(idNum) : String(skin.id || '');
+			scrollItem.innerHTML = skin.image
+				? `<img src="${skin.image}" alt="${skin.name}">`
+				: '<img src="img/ocase_item.png">';
+			spinState.extendedSkinsData.push(idNum !== null ? idNum : skin.id);
+			spinState.extendedSlots.push({
+				idNum: idNum,
+				name: skin.name || '',
+				imageUrl: skin.image || ''
+			});
+			caseStrip.appendChild(scrollItem);
+		});
+	}
+	
+	// Фиксируем стартовую позицию
+	spinState.currentX = 0;
+	caseStrip.style.transform = 'translateX(0)';
+}
+
+// Функция для открытия кейса
+async function openCase() {
+	if (isSpinning || !currentCaseId) return;
+	
+	isSpinning = true;
+	const openBtn = document.getElementById('open-case-btn');
+	openBtn.disabled = true;
+	openBtn.style.opacity = '0.5';
+	
+	try {
+		// Запускаем управляемое вращение (плавный старт + быстрый спин)
+		beginPreSpin();
+		
+		// Отправляем запрос на открытие кейса
+		const response = await fetch(`/api/cases/cases/${currentCaseId}/open/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': getCookie('csrftoken')
+			}
+		});
+		
+		const result = await response.json();
+		
+		if (result.success) {
+			// Плавная остановка ровно на выигрыше. Общее время ~7-8 сек
+			await scheduleDecelerationToWin(result.skin);
+		} else {
+			alert('Ошибка при открытии кейса: ' + result.error);
+			stopSpinImmediate();
+		}
+		
+	} catch (error) {
+		console.error('Ошибка при открытии кейса:', error);
+		alert('Произошла ошибка при открытии кейса');
+		stopSpinImmediate();
+	} finally {
+		isSpinning = false;
+		openBtn.disabled = false;
+		openBtn.style.opacity = '1';
+	}
+}
+
+// Функция для запуска анимации кейса (больше не используется)
+function startCaseAnimation() {}
+
+// Функция для остановки анимации кейса (больше не используется)
+function stopCaseAnimation() {}
+
+// Функция для показа выигранного скина
+function showWinningSkin(skin) {
+	// Обновляем данные в попапе
+	document.getElementById('won-skin-image').src = skin.image || 'img/awm_phoenix.png';
+	document.getElementById('won-skin-name').textContent = skin.name;
+	document.getElementById('won-skin-rarity').textContent = getRarityLabel(skin.rarity);
+	
+	// Показываем попап (используем существующие классы active)
+	document.getElementById('bg').classList.add('active');
+	document.getElementById('drop-popup').classList.add('active');
+	
+	// Старт 48-часового таймера
+	start48hCountdown();
+	
+	// Подсветка выигрыша отключена по требованию
+	// highlightWinningSkin(skin.id);
+}
+
+// Функция для подсветки выигранного скина (отключена)
+function highlightWinningSkin(skinId) {}
+
+// Функция для получения CSRF токена
+function getCookie(name) {
+	let cookieValue = null;
+	if (document.cookie && document.cookie !== '') {
+		const cookies = document.cookie.split(';');
+		for (let i = 0; i < cookies.length; i++) {
+			const cookie = cookies[i].trim();
+			if (cookie.substring(0, name.length + 1) === (name + '=')) {
+				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+				break;
+			}
+		}
+	}
+	return cookieValue;
+}
+
+// Функция для получения CSS класса редкости
+function getRarityClass(rarity) {
+	const rarityMap = {
+		'common': 'blue',
+		'uncommon': 'blue',
+		'rare': 'pink',
+		'epic': 'pink',
+		'legendary': 'yel'
+	};
+	return rarityMap[rarity] || 'blue';
+}
+
+// Функция для получения названия редкости
+function getRarityLabel(rarity) {
+	const rarityMap = {
+		'common': 'Common',
+		'uncommon': 'Uncommon',
+		'rare': 'Rare',
+		'epic': 'Epic',
+		'legendary': 'Legendary'
+	};
+	return rarityMap[rarity] || 'Common';
+}
+
+// Закрытие попапа при клике на фон
+const bgEl = document.getElementById('bg');
+bgEl.addEventListener('click', function() {
+	bgEl.classList.remove('active');
+	document.getElementById('drop-popup').classList.remove('active');
+});
+
+// 48-часовой таймер (MM:SS:HH) для попапа
+let countdownInterval = null;
+function start48hCountdown(){
+	if (countdownInterval) clearInterval(countdownInterval);
+	const el = document.getElementById('drop-bot-time');
+	// 48 часов в секундах
+	let remaining = 48 * 60 * 60;
+	function render(){
+		const hh = Math.floor(remaining / 3600);
+		const mm = Math.floor((remaining % 3600) / 60);
+		const ss = remaining % 60;
+		if (el){ el.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`; }
+		if (remaining <= 0){ clearInterval(countdownInterval); }
+		remaining = Math.max(0, remaining - 1);
+	}
+	render();
+	countdownInterval = setInterval(render, 1000);
+}
+
+// Копирование ника и уведомления
+(function initPopupActions(){
+	const addBtn = document.querySelector('.drop_data_bt');
+	const input = document.querySelector('.drop_data_inp');
+	const confirmBtn = document.querySelector('.drop_mid_confirm');
+	function toast(msg){
+		const div = document.createElement('div');
+		div.textContent = msg;
+		div.style.position = 'fixed';
+		div.style.bottom = '20px';
+		div.style.left = '50%';
+		div.style.transform = 'translateX(-50%)';
+		div.style.zIndex = '9999';
+		div.style.background = 'rgba(0,0,0,0.85)';
+		div.style.color = '#fff';
+		div.style.padding = '10px 14px';
+		div.style.borderRadius = '10px';
+		div.style.fontSize = '14px';
+		div.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+		div.style.pointerEvents = 'none';
+		div.style.opacity = '0';
+		div.style.transition = 'opacity .15s ease';
+		document.body.appendChild(div);
+		requestAnimationFrame(()=>{ div.style.opacity = '1'; });
+		setTimeout(()=>{
+			div.style.opacity = '0';
+			setTimeout(()=>{ if(div.parentNode){ div.parentNode.removeChild(div); } },200);
+		},1500);
+	}
+	if(addBtn && input){
+		addBtn.addEventListener('click', function(e){
+			e.preventDefault();
+			try{
+				navigator.clipboard.writeText(input.value || '');
+				toast('Copied');
+			}catch(err){
+				toast('Copy error');
+			}
+		});
+	}
+	if(confirmBtn){
+		confirmBtn.addEventListener('click', function(e){
+			e.preventDefault();
+			toast('Success');
+			bgEl.classList.remove('active');
+			document.getElementById('drop-popup').classList.remove('active');
+		});
+	}
+})();
+
+// Загружаем данные при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadCaseData);
+</script>
+
+</body>
+</html>
