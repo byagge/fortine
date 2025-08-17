@@ -21,9 +21,9 @@
 		</div>
 		<div class="header_right">
 			{% if request.user.is_authenticated %}
-				<a href="/accounts/" class="bt_login" id="auth-button">ACCOUNT</a>
+				<a href="/accounts/" class="bt_login">ACCOUNT</a>
 			{% else %}
-				<a href="{% url 'main:login' %}" class="bt_login" id="auth-button">LOGIN</a>
+				<a href="{% url 'main:login' %}" class="bt_login">LOGIN</a>
 			{% endif %}
 		</div>
 		<!-- Мобильное меню -->
