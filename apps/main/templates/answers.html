@@ -16,10 +16,10 @@
 		<div class="header_left">
 			<a href="/" class="logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
 			<a href="/" class="menu_item">Homepage</a>
-			<a href="{% url 'answers' %}" class="menu_item">Question & Answer</a>
+			<a href="{% url 'main:answers' %}" class="menu_item">Question & Answer</a>
 		</div>
 		<div class="header_right">
-			<a href="/login/" class="bt_login" id="auth-button">LOGIN</a>
+			<a href="{% url 'main:login' %}" class="bt_login" id="auth-button">LOGIN</a>
 		</div>
 		<!-- Мобильное меню -->
 		<div class="mobile_menu_toggle" id="mobile-menu-toggle">
@@ -37,8 +37,8 @@
 		</div>
 		<nav class="mobile_nav">
 			<a href="/" class="mobile_nav_item">Homepage</a>
-			<a href="{% url 'answers' %}" class="mobile_nav_item">Question & Answer</a>
-			<a href="/login/" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
+			<a href="{% url 'main:answers' %}" class="mobile_nav_item">Question & Answer</a>
+			<a href="{% url 'main:login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
 		</nav>
 	</div>
 	
