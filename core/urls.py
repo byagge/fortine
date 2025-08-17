@@ -9,8 +9,8 @@ from wagtail.documents import urls as wagtaildocs_urls
 from search import views as search_views
 
 urlpatterns = [
-	path("admin/", admin.site.urls),
-	path("wagtail-admin/", include(wagtailadmin_urls)),
+	path("django-admin/", admin.site.urls),
+	path("admin/", include(wagtailadmin_urls)),
 	path("documents/", include(wagtaildocs_urls)),
 	path("search/", search_views.search, name="search"),
 	path("accounts/", include("apps.accounts.urls")),
@@ -19,7 +19,8 @@ urlpatterns = [
 	path("api/cases/", include("apps.cases.api_urls")),
 	path("api/skins/", include("apps.skins.api_urls")),
 	path("finances/", include("apps.finances.urls")),
-	path("", include("apps.main.urls")),
+	# Убираем старые маршруты main, так как теперь они будут обрабатываться Wagtail
+	# path("", include("apps.main.urls")),
 ]
 
 

@@ -23,7 +23,7 @@
 			{% if request.user.is_authenticated %}
 				<a href="/accounts/" class="bt_login" id="auth-button">ACCOUNT</a>
 			{% else %}
-				<a href="{% url 'login' %}" class="bt_login" id="auth-button">LOGIN</a>
+				<a href="/login/" class="bt_login" id="auth-button">LOGIN</a>
 			{% endif %}
 		</div>
 		<!-- Мобильное меню -->
@@ -46,7 +46,7 @@
 			{% if request.user.is_authenticated %}
 				<a href="/accounts/" class="mobile_nav_item mobile_account">ACCOUNT</a>
 			{% else %}
-				<a href="{% url 'login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
+				<a href="/login/" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
 			{% endif %}
 		</nav>
 	</div>

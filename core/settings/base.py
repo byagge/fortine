@@ -166,7 +166,26 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
 # Wagtail settings
 
-WAGTAIL_SITE_NAME = "core"
+WAGTAIL_SITE_NAME = "Fortine"
+
+# Wagtail admin settings
+WAGTAILADMIN_BASE_URL = "http://localhost:8000"
+
+# Wagtail search settings
+WAGTAILSEARCH_BACKENDS = {
+    "default": {
+        "BACKEND": "wagtail.search.backends.database",
+    }
+}
+
+# Wagtail images settings
+WAGTAILIMAGES_IMAGE_MODEL = "wagtailimages.Image"
+
+# Wagtail documents settings
+WAGTAILDOCS_EXTENSIONS = ['csv', 'docx', 'key', 'odt', 'pdf', 'pptx', 'rtf', 'txt', 'xlsx', 'zip']
+
+# Wagtail admin interface settings
+WAGTAILADMIN_NOTIFICATION_USE_HTML = True
 
 # Search
 # https://docs.wagtail.org/en/stable/topics/search/backends.html

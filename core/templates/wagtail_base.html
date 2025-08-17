@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if page.intro %}
+        <div class="wagtail-intro">
+            {{ page.intro|richtext }}
+        </div>
+    {% endif %}
+    
+    {% block wagtail_content %}{% endblock %}
+{% endblock %} 
