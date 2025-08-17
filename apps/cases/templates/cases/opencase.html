@@ -121,7 +121,7 @@ function updateCaseScroll(skins) {
 	skins.forEach(skin => {
 		const el = document.createElement('div');
 		el.className = 'ocase_scroll_item';
-		el.innerHTML = skin.image ? `<img src="${skin.image}" alt="${skin.name}">` : '<img src="img/ocase_item.png">';
+		el.innerHTML = skin.image ? `<img src="${skin.image}" alt="${skin.name}">` : '<img src="/static/img/ocase_item.png">';
 		strip.appendChild(el);
 	});
 }

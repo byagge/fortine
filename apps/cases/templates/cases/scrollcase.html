@@ -175,9 +175,9 @@ const spinState = {
 	lastTs: 0,
 	currentX: 0,
 	speedPxPerSec: 0,
-	maxSpeed: 7000, // очень быстро крутится
-	accelDurationMs: 700, // быстрый, но плавный старт ~0.7с
-	totalDurationMs: 8000, // суммарно ~8с
+	maxSpeed: 5000, // снизили скорость для более плавной прокрутки
+	accelDurationMs: 1000, // более плавный старт ~1с
+	totalDurationMs: 6000, // сократили до ~6с
 	decelAnimation: null,
 	isDecelerating: false,
 	extendedSkinsData: [], // последовательность id скинов в ленте (устар.)
@@ -225,9 +225,11 @@ function beginPreSpin() {
 
 		// Плавное ускорение к максимальной скорости
 		const accelProgress = Math.min(1, elapsed / spinState.accelDurationMs);
-		const targetSpeed = spinState.maxSpeed * accelProgress;
-		// Плавное приближение скорости к целевой
-		spinState.speedPxPerSec += (targetSpeed - spinState.speedPxPerSec) * 0.15;
+		// Используем более плавную кривую ускорения
+		const smoothAccelProgress = accelProgress * accelProgress * (3 - 2 * accelProgress); // smoothstep
+		const targetSpeed = spinState.maxSpeed * smoothAccelProgress;
+		// Более плавное приближение скорости к целевой
+		spinState.speedPxPerSec += (targetSpeed - spinState.speedPxPerSec) * 0.08;
 
 		spinState.currentX += spinState.speedPxPerSec * dt;
 		strip.style.transform = `translateX(${-spinState.currentX}px)`;
@@ -249,13 +251,20 @@ function scheduleDecelerationToWin(skin) {
 		const strip = document.getElementById('case-strip');
 		const now = performance.now();
 		const elapsed = now - spinState.startTs;
-		const minDecelMs = 1800; // плавная остановка не короче 1.8с
+		const minDecelMs = 3000; // более долгая и плавная остановка ~3с
 		const duration = Math.max(minDecelMs, spinState.totalDurationMs - elapsed);
 
 		const caseScroll = document.getElementById('case-scroll');
 		const viewportCenter = caseScroll.clientWidth / 2;
+		const itemSize = getCssVarNumber('--case-item-size', 180);
+		const gap = getCssVarNumber('--case-gap', 12);
+		const itemWidth = itemSize + gap;
+		// Убеждаемся, что используем одинаковые значения
+		if (Math.abs(itemWidth - spinState.itemWidth) > 0.1) {
+			console.warn('Item width mismatch:', { itemWidth, spinStateItemWidth: spinState.itemWidth });
+		}
 		const traveledCenterX = spinState.currentX + viewportCenter;
-		const currentIndex = Math.floor(traveledCenterX / spinState.itemWidth);
+		const currentIndex = Math.floor(traveledCenterX / itemWidth);
 
 		// Планируем целевой индекс впереди текущего на фиксированное число слотов
 		const minItemsAhead = 12;
@@ -299,8 +308,38 @@ function scheduleDecelerationToWin(skin) {
 		}
 
 		// Координаты центра целевого элемента и плавная остановка
-		const targetCenterX = idxTarget * spinState.itemWidth + spinState.itemWidth / 2;
+		// Правильный расчет: каждый элемент занимает itemSize + gap
+		// Позиция начала целевого элемента (с учетом всех предыдущих элементов и gap)
+		const targetStartX = idxTarget * itemWidth;
+		// Центр элемента относительно начала ленты
+		const targetCenterX = targetStartX + itemSize / 2;
+		// Смещение ленты, чтобы центр элемента оказался в центре viewport
+		// Убираем дополнительное смещение +20, чтобы элемент точно остановился по центру
 		const targetTranslate = Math.max(0, targetCenterX - viewportCenter);
+		
+		// Дополнительная отладка для понимания позиции
+		console.log('Position debug:', {
+			viewportCenter,
+			targetCenterX,
+			targetTranslate,
+			'final position': targetCenterX - targetTranslate,
+			'expected center': viewportCenter
+		});
+		
+		// Отладочная информация (можно убрать в продакшене)
+		console.log('Target calculation:', {
+			idxTarget,
+			itemSize,
+			gap,
+			itemWidth: spinState.itemWidth,
+			calculatedItemWidth: itemWidth,
+			targetStartX,
+			targetCenterX,
+			viewportCenter,
+			targetTranslate,
+			duration: duration + 'ms',
+			'itemWidth === spinState.itemWidth': itemWidth === spinState.itemWidth
+		});
 
 		cancelAnimationFrame(spinState.rafId);
 		spinState.isDecelerating = true;
@@ -311,7 +350,7 @@ function scheduleDecelerationToWin(skin) {
 			],
 			{
 				duration: duration,
-				easing: 'cubic-bezier(0.05, 0.7, 0.25, 1)',
+				easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)', // еще более плавная кривая
 				fill: 'forwards'
 			}
 		);
@@ -319,8 +358,12 @@ function scheduleDecelerationToWin(skin) {
 			strip.style.transform = `translateX(${-targetTranslate}px)`;
 			spinState.currentX = targetTranslate;
 			spinState.isDecelerating = false;
-			showWinningSkin(skin);
-			resolve();
+			
+			// Небольшая задержка перед показом модального окна для лучшего UX
+			setTimeout(() => {
+				showWinningSkin(skin);
+				resolve();
+			}, 500);
 		};
 	});
 }
@@ -404,7 +447,7 @@ function updateCaseScroll(skins) {
 	const gap = getCssVarNumber('--case-gap', 12);
 	spinState.itemWidth = itemSize + gap;
 
-	// Оценка необходимой длины ленты под быструю прокрутку ~8с
+	// Оценка необходимой длины ленты под быструю прокрутку ~6с
 	const estimatePathPx = spinState.maxSpeed * (spinState.totalDurationMs / 1000) * 1.15; // небольшой запас
 	const minItemsNeeded = Math.ceil(estimatePathPx / spinState.itemWidth) + 40; // буфер
 	const repeats = Math.max(30, Math.ceil(minItemsNeeded / skins.length));
@@ -417,7 +460,7 @@ function updateCaseScroll(skins) {
 			scrollItem.dataset.skinId = idNum !== null ? String(idNum) : String(skin.id || '');
 			scrollItem.innerHTML = skin.image
 				? `<img src="${skin.image}" alt="${skin.name}">`
-				: '<img src="img/ocase_item.png">';
+				: '<img src="/static/img/ocase_item.png">';
 			spinState.extendedSkinsData.push(idNum !== null ? idNum : skin.id);
 			spinState.extendedSlots.push({
 				idNum: idNum,
@@ -458,7 +501,7 @@ async function openCase() {
 		const result = await response.json();
 		
 		if (result.success) {
-			// Плавная остановка ровно на выигрыше. Общее время ~7-8 сек
+			// Плавная остановка ровно на выигрыше. Общее время ~6 сек
 			await scheduleDecelerationToWin(result.skin);
 		} else {
 			alert('Ошибка при открытии кейса: ' + result.error);
@@ -485,7 +528,7 @@ function stopCaseAnimation() {}
 // Функция для показа выигранного скина
 function showWinningSkin(skin) {
 	// Обновляем данные в попапе
-	document.getElementById('won-skin-image').src = skin.image || 'img/awm_phoenix.png';
+	document.getElementById('won-skin-image').src = skin.image || '/static/img/awm_phoenix.png';
 	document.getElementById('won-skin-name').textContent = skin.name;
 	document.getElementById('won-skin-rarity').textContent = getRarityLabel(skin.rarity);
 	

@@ -28,11 +28,44 @@
 			<div class="header_acc">
 				<div class="acc_img"><img src="{% static 'img/acc_img.png' %}"></div>
 				<span class="acc_name">@user</span>
-				<a href="#" class="acc_logout"><img src="{% static 'img/ico_logout.svg' %}"></a>
+				<a href="#" class="acc_logout" id="header-logout"><img src="{% static 'img/ico_logout.svg' %}"></a>
 			</div>
 			<div class="mob_bt"><img src="{% static 'img/ico_mobmenu.svg' %}"></div>
 		</div>
+		<!-- Мобильное меню -->
+		<div class="mobile_menu_toggle" id="mobile-menu-toggle">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
 	</header>
+	
+	<!-- Мобильное меню -->
+	<div class="mobile_menu" id="mobile-menu">
+		<div class="mobile_menu_header">
+			<a href="/" class="mobile_logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+			<button class="mobile_menu_close" id="mobile-menu-close">&times;</button>
+		</div>
+		<nav class="mobile_nav">
+			<a href="/" class="mobile_nav_item">Homepage</a>
+			<a href="{% url 'answers' %}" class="mobile_nav_item">Question & Answer</a>
+			<a href="{% url 'account' %}" class="mobile_nav_item">Account</a>
+			<a href="{% url 'logout' %}" class="mobile_nav_item mobile_logout">Logout</a>
+		</nav>
+		<!-- Мобильный баланс -->
+		<div class="mobile_balance">
+			<div class="mobile_balance_header">
+				<span>Balance</span>
+				<div class="mobile_balance_amount">
+					<span>$</span> <span class="mobile_header_balance">0</span>
+				</div>
+			</div>
+			<a href="#" class="mobile_deposit_btn">
+				<img src="{% static 'img/ico_wallet.svg' %}"> Deposit
+			</a>
+		</div>
+	</div>
+	
 	<div class="page">
 		<div class="acc_block contain">
 			<div class="acc_left">
@@ -99,6 +132,98 @@
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script src="{% static 'js/script.js' %}"></script>
 <script src="{% static 'js/account.js' %}"></script>
+
+<script>
+// Обновление баланса для мобильного меню
+async function refreshMobileBalance() {
+	try {
+		const res = await fetch('/accounts/account-info/', { credentials: 'same-origin' });
+		if (!res.ok) return;
+		const data = await res.json();
+		if (!data || !data.success || !data.user) return;
+		const user = data.user;
+		
+		// Обновляем основной баланс
+		var bal = document.querySelector('.header_balance');
+		if (bal && user.balance != null) bal.textContent = user.balance;
+		
+		// Обновляем мобильный баланс
+		var mobileBal = document.querySelector('.mobile_header_balance');
+		if (mobileBal && user.balance != null) mobileBal.textContent = user.balance;
+		
+		// Обновляем баланс в правом блоке
+		var balanceMoney = document.querySelector('.balance_money');
+		if (balanceMoney && user.balance != null) balanceMoney.textContent = user.balance + ' $';
+		
+		var nameEl = document.querySelector('.acc_name');
+		if (nameEl) {
+			var nick = user.nick_in_game || user.username || user.email || '@user';
+			nameEl.textContent = nick;
+		}
+		
+		if (user.avatar) {
+			var imgs = document.querySelectorAll('.acc_img img');
+			imgs.forEach(function(img){ img.src = user.avatar; });
+		}
+	} catch (e) {
+		console.error('Error refreshing balance:', e);
+	}
+}
+
+// Обработчик для logout в хедере
+document.addEventListener('DOMContentLoaded', function() {
+	document.getElementById('header-logout').addEventListener('click', function(e) {
+		e.preventDefault();
+		
+		// Очищаем localStorage
+		localStorage.removeItem('authToken');
+		localStorage.removeItem('userData');
+		
+		// Мгновенно перенаправляем на главную страницу
+		window.location.href = '/';
+		
+		// В фоне выполняем logout через API (без ожидания)
+		fetch('/accounts/logout/', {
+			method: 'GET',
+			credentials: 'same-origin'
+		}).catch(function(error) {
+			console.error('Logout API error:', error);
+		});
+	});
+	
+	// Обработчик для logout в мобильном меню
+	document.querySelector('.mobile_logout').addEventListener('click', function(e) {
+		e.preventDefault();
+		
+		// Закрываем мобильное меню
+		document.getElementById('mobile-menu').classList.remove('active');
+		document.getElementById('mobile-menu-toggle').classList.remove('active');
+		document.body.classList.remove('menu-open');
+		
+		// Очищаем localStorage
+		localStorage.removeItem('authToken');
+		localStorage.removeItem('userData');
+		
+		// Мгновенно перенаправляем на главную страницу
+		window.location.href = '/';
+		
+		// В фоне выполняем logout через API (без ожидания)
+		fetch('/accounts/logout/', {
+			method: 'GET',
+			credentials: 'same-origin'
+		}).catch(function(error) {
+			console.error('Logout API error:', error);
+		});
+	});
+});
+
+// Обновляем баланс при загрузке страницы
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', refreshMobileBalance);
+} else {
+	refreshMobileBalance();
+}
+</script>
 
 </body>
 </html>

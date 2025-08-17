@@ -82,27 +82,6 @@ $(document).ready(function(){
 		e.preventDefault();
 		$('#bg,.chgname_popup').addClass('active');
 	});
-	$('#auth-button').on(clk, function(e){
-		// Check if user is already logged in
-		var authToken = localStorage.getItem('authToken');
-		var userData = localStorage.getItem('userData');
-		
-		if (authToken && userData) {
-			// User is logged in, redirect to accounts page
-			window.location.href = '/accounts/';
-			return;
-		}
-		
-		// User is not logged in, prevent default and show login popup
-		e.preventDefault();
-		$('#bg,.login_popup').addClass('active');
-		
-		// Clear any previous errors when opening popup
-		setTimeout(function() {
-			$('.form-error').removeClass('show error-shake').hide();
-			$('.form-success').removeClass('show').hide();
-		}, 100);
-	});
 	$('.platform_item').on(clk, function(e){
 		$('.platform_list .platform_item').removeClass('active');
 		$(this).addClass('active');
@@ -363,3 +342,117 @@ $(document).ready(function(){
 		});
 	});
 })
+
+// Мобильное меню функциональность
+$(document).ready(function() {
+	// Проверяем, есть ли мобильное меню на странице
+	if ($('#mobile-menu').length === 0) {
+		return; // Мобильное меню не найдено на этой странице
+	}
+	
+	// Открытие мобильного меню
+	$('#mobile-menu-toggle').on('click', function() {
+		$('#mobile-menu').addClass('active');
+		$(this).addClass('active');
+		$('body').addClass('menu-open');
+	});
+	
+	// Закрытие мобильного меню
+	$('#mobile-menu-close').on('click', function() {
+		$('#mobile-menu').removeClass('active');
+		$(this).removeClass('active');
+		$('body').removeClass('menu-open');
+	});
+	
+	// Закрытие меню при клике на пункт меню
+	$('.mobile_nav_item').on('click', function() {
+		$('#mobile-menu').removeClass('active');
+		$('#mobile-menu-toggle').removeClass('active');
+		$('body').removeClass('menu-open');
+	});
+	
+	// Закрытие меню при клике вне его
+	$(document).on('click', function(e) {
+		if (!$(e.target).closest('#mobile-menu, #mobile-menu-toggle').length) {
+			$('#mobile-menu').removeClass('active');
+			$('#mobile-menu-toggle').removeClass('active');
+			$('body').removeClass('menu-open');
+		}
+	});
+	
+	// Закрытие меню при свайпе влево
+	let startX = 0;
+	let currentX = 0;
+	
+	$('#mobile-menu').on('touchstart', function(e) {
+		startX = e.originalEvent.touches[0].clientX;
+	});
+	
+	$('#mobile-menu').on('touchmove', function(e) {
+		currentX = e.originalEvent.touches[0].clientX;
+	});
+	
+	$('#mobile-menu').on('touchend', function() {
+		const diffX = startX - currentX;
+		if (diffX > 50) { // Свайп влево более 50px
+			$('#mobile-menu').removeClass('active');
+			$('#mobile-menu-toggle').removeClass('active');
+			$('body').removeClass('menu-open');
+		}
+	});
+	
+	// Синхронизация состояния авторизации для мобильного меню
+	function updateMobileAuthStatus() {
+		var authToken = localStorage.getItem('authToken');
+		var userData = localStorage.getItem('userData');
+		
+		if (authToken && userData) {
+			try {
+				var user = JSON.parse(userData);
+				if (user && user.nick_in_game) {
+					$('#mobile-auth-button').text('ACCOUNT').attr('href', '/accounts/');
+				}
+			} catch (e) {
+				console.log('Invalid user data found, clearing...');
+			}
+		} else {
+			$('#mobile-auth-button').text('LOGIN').attr('href', '/login/');
+		}
+	}
+	
+	// Обновление статуса при загрузке страницы
+	updateMobileAuthStatus();
+	
+	// Обработка клика по мобильной кнопке депозита
+	$(document).on('click', '.mobile_deposit_btn', function(e) {
+		// Закрываем мобильное меню перед переходом
+		$('#mobile-menu').removeClass('active');
+		$('#mobile-menu-toggle').removeClass('active');
+		$('body').removeClass('menu-open');
+	});
+	
+	// Обработка logout в мобильном меню
+	$(document).on('click', '.mobile_logout', function(e) {
+		e.preventDefault();
+		
+		// Закрываем мобильное меню
+		$('#mobile-menu').removeClass('active');
+		$('#mobile-menu-toggle').removeClass('active');
+		$('body').removeClass('menu-open');
+		
+		// Очищаем localStorage
+		localStorage.removeItem('authToken');
+		localStorage.removeItem('userData');
+		
+		// Мгновенно перенаправляем на главную страницу
+		window.location.href = '/';
+		
+		// В фоне выполняем logout через API (без ожидания)
+		fetch('/accounts/logout/', {
+			method: 'GET',
+			credentials: 'same-origin'
+		}).catch(function(error) {
+			console.error('Logout API error:', error);
+		});
+	});
+});

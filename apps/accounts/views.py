@@ -231,7 +231,7 @@ class UploadAvatarView(APIView):
 				"error": str(e)
 			}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def logout_user(request):
 	"""Выйти из аккаунта"""

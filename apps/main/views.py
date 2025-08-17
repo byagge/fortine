@@ -30,3 +30,12 @@ def account(request):
 @staff_member_required
 def requests_view(request):
 	return render(request, "requests.html")
+
+
+@require_GET
+def login_view(request):
+	# Если пользователь уже авторизован, перенаправляем на главную
+	if request.user.is_authenticated:
+		from django.shortcuts import redirect
+		return redirect('index')
+	return render(request, "login.html")

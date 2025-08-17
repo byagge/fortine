@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Fortine - Login</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/ico" href="{% static 'favicon.ico' %}">
+	
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+	
+</head>
+<body>
+	<header class="contain">
+		<div class="header_left">
+			<a href="/" class="logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+			<a href="/" class="menu_item">Homepage</a>
+			<a href="{% url 'answers' %}" class="menu_item">Question & Answer</a>
+		</div>
+		<div class="header_right">
+			<a href="/" class="bt_login">BACK TO HOME</a>
+		</div>
+		<!-- Мобильное меню -->
+		<div class="mobile_menu_toggle" id="mobile-menu-toggle">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</header>
+	
+	<!-- Мобильное меню -->
+	<div class="mobile_menu" id="mobile-menu">
+		<div class="mobile_menu_header">
+			<a href="/" class="mobile_logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+			<button class="mobile_menu_close" id="mobile-menu-close">&times;</button>
+		</div>
+		<nav class="mobile_nav">
+			<a href="/" class="mobile_nav_item">Homepage</a>
+			<a href="{% url 'answers' %}" class="mobile_nav_item">Question & Answer</a>
+		</nav>
+	</div>
+	
+	<div class="page">
+		<div class="login_page">
+			<div class="login_container">
+				<div class="login_header">
+					<h1>Log in or register to your account</h1>
+					<p>Join our gaming community and start your journey</p>
+				</div>
+				
+				<div class="login_tabs">
+					<button class="tab_button active" data-tab="login">Login</button>
+					<button class="tab_button" data-tab="register">Register</button>
+				</div>
+				
+				<!-- Форма входа -->
+				<form class="login_form active" id="login-form">
+					<div class="form_group">
+						<label class="form_label">Enter your email address</label>
+						<div class="input_container">
+							<input type="email" class="form_input" name="email" placeholder="example@example.com" required>
+							<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+							<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+						</div>
+						<div class="error-message" style="display: none;"></div>
+					</div>
+					
+					<div class="form_group">
+						<label class="form_label">Enter your password</label>
+						<div class="input_container password-field">
+							<input type="password" class="form_input" name="password" placeholder="********" required>
+							<button type="button" class="password-toggle" aria-label="Toggle password visibility">
+								<img src="{% static 'img/ico_eye.svg' %}" class="eye-icon">
+							</button>
+							<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+							<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+						</div>
+						<div class="error-message" style="display: none;"></div>
+					</div>
+					
+					<div class="form_actions">
+						<button type="submit" class="submit_button">Login</button>
+						<a href="#" class="forgot_password">Forgot password?</a>
+					</div>
+				</form>
+				
+				<!-- Форма регистрации -->
+				<form class="register_form" id="register-form">
+					<div class="form_group">
+						<label class="form_label">Enter your email address</label>
+						<div class="input_container">
+							<input type="email" class="form_input" name="email" placeholder="example@example.com" required>
+							<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+							<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+						</div>
+						<div class="error-message" style="display: none;"></div>
+					</div>
+					
+					<div class="form_group">
+						<label class="form_label">Enter your password</label>
+						<div class="input_container password-field">
+							<input type="password" class="form_input" name="password" placeholder="********" required>
+							<button type="button" class="password-toggle" aria-label="Toggle password visibility">
+								<img src="{% static 'img/ico_eye.svg' %}" class="eye-icon">
+							</button>
+							<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+							<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+						</div>
+						<div class="error-message" style="display: none;"></div>
+					</div>
+					
+					<div class="form_group">
+						<label class="form_label">Enter your username</label>
+						<div class="input_container">
+							<input type="text" class="form_input" name="name" placeholder="@game37op1" required>
+							<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
+							<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
+						</div>
+						<div class="error-message" style="display: none;"></div>
+					</div>
+					
+					<div class="form_group">
+						<label class="form_label">Choose your platform</label>
+						<div class="platform_list">
+							<span class="platform_item" data-platform="ps"><img src="{% static 'img/ico_pl_ps.svg' %}"></span>
+							<span class="platform_item" data-platform="xb"><img src="{% static 'img/ico_pl_xb.svg' %}"></span>
+							<span class="platform_item" data-platform="nint"><img src="{% static 'img/ico_pl_nint.svg' %}"></span>
+							<span class="platform_item" data-platform="apple"><img src="{% static 'img/ico_pl_apple.svg' %}"></span>
+							<span class="platform_item" data-platform="wind"><img src="{% static 'img/ico_pl_wind.svg' %}"></span>
+							<span class="platform_item" data-platform="andr"><img src="{% static 'img/ico_pl_andr.svg' %}"></span>
+						</div>
+					</div>
+					
+					<div class="form_actions">
+						<button type="submit" class="submit_button">Register</button>
+					</div>
+				</form>
+				
+				<div class="form_messages">
+					<div class="form-error" style="display: none;"></div>
+					<div class="form-success" style="display: none;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+	<script src="{% static 'js/script.js' %}"></script>
+	<script src="{% static 'js/login.js' %}"></script>
+</body>
+</html> 

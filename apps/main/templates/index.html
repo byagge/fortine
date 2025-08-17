@@ -23,10 +23,34 @@
 			{% if request.user.is_authenticated %}
 				<a href="/accounts/" class="bt_login" id="auth-button">ACCOUNT</a>
 			{% else %}
-				<a href="#" class="bt_login" id="auth-button">LOGIN</a>
+				<a href="{% url 'login' %}" class="bt_login" id="auth-button">LOGIN</a>
 			{% endif %}
 		</div>
+		<!-- Мобильное меню -->
+		<div class="mobile_menu_toggle" id="mobile-menu-toggle">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
 	</header>
+	
+	<!-- Мобильное меню -->
+	<div class="mobile_menu" id="mobile-menu">
+		<div class="mobile_menu_header">
+			<a href="/" class="mobile_logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+			<button class="mobile_menu_close" id="mobile-menu-close">&times;</button>
+		</div>
+		<nav class="mobile_nav">
+			<a href="/" class="mobile_nav_item">Homepage</a>
+			<a href="{% url 'answers' %}" class="mobile_nav_item">Question & Answer</a>
+			{% if request.user.is_authenticated %}
+				<a href="/accounts/" class="mobile_nav_item mobile_account">ACCOUNT</a>
+			{% else %}
+				<a href="{% url 'login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
+			{% endif %}
+		</nav>
+	</div>
+	
 	<div class="page">
 		<div class="main">
 			<div class="top_bg">
@@ -74,50 +98,6 @@
 			</div>
 		</div>
 	</div>
-
-	<div id="bg"></div>
-	<div class="login_popup popup_block">
-		<p class="login_pup_hd">Log in or register to <br>your account</p>
-		<form name="login_form">
-			<p class="form_inp_hd">Enter your email address</p>
-			<div class="chgname_inprow">
-				<input type="email" class="drop_data_inp" name="email" placeholder="example@example.com">
-				<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
-				<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
-				<div class="error-message" style="display: none;"></div>
-			</div>
-			<p class="form_inp_hd">Enter your password</p>
-			<div class="chgname_inprow password-field">
-				<input type="password" class="drop_data_inp" name="password" placeholder="********">
-				<button type="button" class="password-toggle" aria-label="Toggle password visibility">
-					<img src="{% static 'img/ico_eye.svg' %}" class="eye-icon">
-				</button>
-				<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
-				<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
-				<div class="error-message" style="display: none;"></div>
-			</div>
-			<p class="form_inp_hd">Enter your username</p>
-			<div class="chgname_inprow">
-				<input type="text" class="drop_data_inp" name="name" placeholder="@game37op1">
-				<span class="input-icon success-icon" style="display: none;"><img src="{% static 'img/ico_check.svg' %}"></span>
-				<span class="input-icon error-icon" style="display: none;"><img src="{% static 'img/ico_error.svg' %}"></span>
-				<div class="error-message" style="display: none;"></div>
-			</div>
-			<p class="form_inp_hd">Сhoose your platform</p>
-			<div class="platform_list">
-				<span class="platform_item"><img src="{% static 'img/ico_pl_ps.svg' %}"></span>
-				<span class="platform_item"><img src="{% static 'img/ico_pl_xb.svg' %}"></span>
-				<span class="platform_item"><img src="{% static 'img/ico_pl_nint.svg' %}"></span>
-				<span class="platform_item"><img src="{% static 'img/ico_pl_apple.svg' %}"></span>
-				<span class="platform_item"><img src="{% static 'img/ico_pl_wind.svg' %}"></span>
-				<span class="platform_item"><img src="{% static 'img/ico_pl_andr.svg' %}"></span>
-			</div>
-			<div class="form-error" style="display: none;"></div>
-			<div class="form-success" style="display: none;"></div>
-			<a href="#" class="drop_mid_confirm">Confirm</a>
-		</form>
-	</div>
-	
 	
 	<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 	<script src="{% static 'js/script.js' %}"></script>

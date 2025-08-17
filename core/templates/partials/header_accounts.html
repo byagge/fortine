@@ -15,11 +15,45 @@
 		<div class="header_acc">
 			<div class="acc_img"><img src="{% static 'img/acc_img.png' %}"></div>
 			 <a href="{% url 'account' %}"><span class="acc_name">@user</span></a>
-			<a href="{% url 'logout' %}" class="acc_logout"><img src="{% static 'img/ico_logout.svg' %}"></a>
+			<a href="#" class="acc_logout" id="header-logout"><img src="{% static 'img/ico_logout.svg' %}"></a>
 		</div>
 		<div class="mob_bt"><img src="{% static 'img/ico_mobmenu.svg' %}"></div>
 	</div>
+	<!-- Мобильное меню -->
+	<div class="mobile_menu_toggle" id="mobile-menu-toggle">
+		<span></span>
+		<span></span>
+		<span></span>
+	</div>
 </header> 
+
+<!-- Мобильное меню -->
+<div class="mobile_menu" id="mobile-menu">
+	<div class="mobile_menu_header">
+		<a href="/" class="mobile_logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
+		<button class="mobile_menu_close" id="mobile-menu-close">&times;</button>
+	</div>
+	<nav class="mobile_nav">
+		<a href="/" class="mobile_nav_item">Homepage</a>
+		<a href="{% url 'answers' %}" class="mobile_nav_item">Question & Answer</a>
+		<a href="{% url 'account' %}" class="mobile_nav_item">Account</a>
+		<a href="{% url 'finances:deposit' %}" class="mobile_nav_item">Deposit</a>
+		<a href="{% url 'finances:history' %}" class="mobile_nav_item">History</a>
+	</nav>
+	<!-- Мобильный баланс -->
+	<div class="mobile_balance">
+		<div class="mobile_balance_header">
+			<span>Balance</span>
+			<div class="mobile_balance_amount">
+				<span>$</span> <span class="mobile_header_balance">0</span>
+			</div>
+		</div>
+		<a href="{% url 'finances:deposit' %}" class="mobile_deposit_btn">
+			<img src="{% static 'img/ico_wallet.svg' %}"> Deposit
+		</a>
+	</div>
+</div>
+
 <script>
 (function(){
 	async function refreshHeader() {
@@ -29,8 +63,15 @@
 			const data = await res.json();
 			if (!data || !data.success || !data.user) return;
 			const user = data.user;
+			
+			// Обновляем основной баланс
 			var bal = document.querySelector('.header_balance');
 			if (bal && user.balance != null) bal.textContent = user.balance;
+			
+			// Обновляем мобильный баланс
+			var mobileBal = document.querySelector('.mobile_header_balance');
+			if (mobileBal && user.balance != null) mobileBal.textContent = user.balance;
+			
 			var nameEl = document.querySelector('.acc_name');
 			if (nameEl) {
 				var nick = user.nick_in_game || user.username || user.email || '@user';
@@ -49,5 +90,25 @@
 	} else {
 		refreshHeader();
 	}
+	
+	// Обработка logout в хедере
+	document.getElementById('header-logout').addEventListener('click', function(e) {
+		e.preventDefault();
+		
+		// Очищаем localStorage
+		localStorage.removeItem('authToken');
+		localStorage.removeItem('userData');
+		
+		// Мгновенно перенаправляем на главную страницу
+		window.location.href = '/';
+		
+		// В фоне выполняем logout через API (без ожидания)
+		fetch('/accounts/logout/', {
+			method: 'GET',
+			credentials: 'same-origin'
+		}).catch(function(error) {
+			console.error('Logout API error:', error);
+		});
+	});
 })();
 </script> 
