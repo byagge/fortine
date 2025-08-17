@@ -30,7 +30,7 @@ $(document).ready(function(){
 		// User is not logged in or data is invalid, clear everything and show LOGIN
 		localStorage.removeItem('authToken');
 		localStorage.removeItem('userData');
-		$('#auth-button').text('LOGIN').attr('href', '#');
+		$('#auth-button').text('LOGIN').attr('href', '/login/');
 	}
 	
 	// Reset form to initial state
@@ -312,7 +312,7 @@ $(document).ready(function(){
 					// Authentication error, clear auth data
 					localStorage.removeItem('authToken');
 					localStorage.removeItem('userData');
-					$('#auth-button').text('LOGIN').attr('href', '#');
+					$('#auth-button').text('LOGIN').attr('href', '/login/');
 					errorMsg = 'Authentication failed. Please login again.';
 				}
 				
