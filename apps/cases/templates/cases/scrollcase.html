@@ -61,20 +61,36 @@
 		#case-scroll {
 			height: var(--case-item-size);
 			overflow: hidden;
+			position: relative;
 		}
 		.ocase_strip {
 			display: flex;
 			gap: var(--case-gap);
 			will-change: transform;
+			position: relative;
 		}
 		.ocase_scroll_item {
 			min-width: var(--case-item-size) !important;
 			height: var(--case-item-size) !important;
+			flex-shrink: 0;
 		}
 		.ocase_scroll_item img {
 			width: 100% !important;
 			height: 100% !important;
 			object-fit: contain !important;
+		}
+		
+		/* Отладочный индикатор центра (можно убрать в продакшене) */
+		#case-scroll::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 50%;
+			width: 2px;
+			height: 100%;
+			background: red;
+			z-index: 1000;
+			transform: translateX(-50%);
 		}
 	</style>
 </head>
@@ -313,8 +329,8 @@ function scheduleDecelerationToWin(skin) {
 		const targetStartX = idxTarget * itemWidth;
 		// Центр элемента относительно начала ленты
 		const targetCenterX = targetStartX + itemSize / 2;
-		// Смещение ленты, чтобы центр элемента оказался в центре viewport
-		// Убираем дополнительное смещение +20, чтобы элемент точно остановился по центру
+		// Смещение ленты, чтобы центр элемента оказался точно в центре viewport
+		// Центрируем элемент: targetCenterX - viewportCenter = 0 означает, что центр элемента совпадает с центром viewport
 		const targetTranslate = Math.max(0, targetCenterX - viewportCenter);
 		
 		// Дополнительная отладка для понимания позиции
@@ -323,7 +339,8 @@ function scheduleDecelerationToWin(skin) {
 			targetCenterX,
 			targetTranslate,
 			'final position': targetCenterX - targetTranslate,
-			'expected center': viewportCenter
+			'expected center': viewportCenter,
+			'centering check': Math.abs((targetCenterX - targetTranslate) - viewportCenter) < 1 ? 'OK' : 'MISALIGNED'
 		});
 		
 		// Отладочная информация (можно убрать в продакшене)
@@ -338,7 +355,10 @@ function scheduleDecelerationToWin(skin) {
 			viewportCenter,
 			targetTranslate,
 			duration: duration + 'ms',
-			'itemWidth === spinState.itemWidth': itemWidth === spinState.itemWidth
+			'itemWidth === spinState.itemWidth': itemWidth === spinState.itemWidth,
+			'final element position': targetCenterX - targetTranslate,
+			'viewport center': viewportCenter,
+			'centering accuracy': Math.abs((targetCenterX - targetTranslate) - viewportCenter)
 		});
 
 		cancelAnimationFrame(spinState.rafId);
@@ -471,9 +491,28 @@ function updateCaseScroll(skins) {
 		});
 	}
 	
-	// Фиксируем стартовую позицию
+	// Фиксируем стартовую позицию и убеждаемся, что первый элемент по центру
 	spinState.currentX = 0;
 	caseStrip.style.transform = 'translateX(0)';
+	
+	// Центрируем первый элемент при загрузке
+	const viewportCenter = document.getElementById('case-scroll').clientWidth / 2;
+	const firstItemCenter = itemSize / 2;
+	const initialOffset = Math.max(0, firstItemCenter - viewportCenter);
+	caseStrip.style.transform = `translateX(${-initialOffset}px)`;
+	spinState.currentX = initialOffset;
+	
+	// Отладочная информация о размерах
+	console.log('Case scroll updated:', {
+		itemSize,
+		gap,
+		itemWidth: spinState.itemWidth,
+		totalItems: caseStrip.children.length,
+		stripWidth: caseStrip.scrollWidth,
+		viewportWidth: document.getElementById('case-scroll').clientWidth,
+		initialOffset,
+		firstItemCentered: Math.abs((firstItemCenter - initialOffset) - viewportCenter) < 1
+	});
 }
 
 // Функция для открытия кейса
