@@ -16,13 +16,13 @@
 		<div class="header_left">
 			<a href="/" class="logo"><img src="{% static 'img/logo.svg' %}"> Gametrim</a>
 			<a href="/" class="menu_item">Homepage</a>
-			<a href="{% url 'main:answers' %}" class="menu_item">Question & Answer</a>
+			<a href="{% url 'answers' %}" class="menu_item">Question & Answer</a>
 		</div>
 		<div class="header_right">
 			{% if request.user.is_authenticated %}
 				<a href="/accounts/" class="mobile_nav_item mobile_account">ACCOUNT</a>
 			{% else %}
-				<a href="{% url 'main:login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
+				<a href="{% url 'login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
 			{% endif %}
 		</div>
 		<!-- Мобильное меню -->
@@ -41,8 +41,8 @@
 		</div>
 		<nav class="mobile_nav">
 			<a href="/" class="mobile_nav_item">Homepage</a>
-			<a href="{% url 'main:answers' %}" class="mobile_nav_item">Question & Answer</a>
-			<a href="{% url 'main:login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
+			<a href="{% url 'answers' %}" class="mobile_nav_item">Question & Answer</a>
+			<a href="{% url 'login' %}" class="mobile_nav_item mobile_login" id="mobile-auth-button">LOGIN</a>
 		</nav>
 	</div>
 	

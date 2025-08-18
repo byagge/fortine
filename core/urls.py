@@ -19,7 +19,7 @@ urlpatterns = [
 	path("api/cases/", include("apps.cases.api_urls")),
 	path("api/skins/", include("apps.skins.api_urls")),
 	path("finances/", include("apps.finances.urls")),
-	path("", include("apps.main.urls", namespace="main")),
+	path("", include("apps.main.urls")),
 ]
 
 
