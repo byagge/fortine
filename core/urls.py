@@ -18,6 +18,7 @@ urlpatterns = [
 	path("skins/", include("apps.skins.urls")),
 	path("api/cases/", include("apps.cases.api_urls")),
 	path("api/skins/", include("apps.skins.api_urls")),
+	path("api/config/", include("apps.config.api_urls")),
 	path("finances/", include("apps.finances.urls")),
 	path("", include("apps.main.urls")),
 ]

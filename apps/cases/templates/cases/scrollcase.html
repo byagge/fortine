@@ -76,6 +76,109 @@
 			height: 100% !important;
 			object-fit: contain !important;
 		}
+		
+		/* Стили для объединенного модального окна */
+		.drop_popup {
+			max-height: 90vh;
+			overflow: hidden; /* По умолчанию скрываем скролл */
+		}
+		
+		/* ПК версия - две колонки */
+		@media (min-width: 768px) {
+			.drop_popup {
+				display: flex;
+				max-width: 90vw;
+				width: 90vw;
+				overflow: hidden;
+			}
+			
+			.drop_popup .drop_top {
+				flex: 1;
+				border-right: 1px solid rgba(255, 255, 255, 0.1);
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 20px;
+			}
+			
+			.drop_popup .drop_mid {
+				flex: 1;
+				padding: 20px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+			
+			.drop_popup .drop_top_img {
+				text-align: center;
+			}
+			
+			.drop_popup .drop_top_img img {
+				max-width: 80%;
+				height: auto;
+			}
+			
+			.drop_popup .drop_top_txt {
+				margin-top: 20px;
+				text-align: center;
+			}
+			
+			.drop_popup .drop_top_mod {
+				font-size: 24px;
+				margin-bottom: 10px;
+			}
+			
+			.drop_popup .drop_top_name {
+				font-size: 18px;
+			}
+		}
+		
+		/* Мобильная версия - скроллинг */
+		@media (max-width: 767px) {
+			.drop_popup {
+				overflow-y: auto;
+				max-height: 90vh;
+			}
+			
+			.drop_popup .drop_top,
+			.drop_popup .drop_mid {
+				width: 100%;
+			}
+		}
+		
+		.drop_mid_wait {
+			margin-top: 20px;
+			padding-top: 20px;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+		}
+		
+		.drop_mid_wait_hd {
+			font-size: 18px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 10px;
+			text-align: center;
+		}
+		
+		.drop_mid_wait_descr {
+			font-size: 14px;
+			color: rgba(255, 255, 255, 0.8);
+			margin-bottom: 15px;
+			text-align: center;
+			line-height: 1.4;
+		}
+		
+		.drop_mid_wait_time {
+			font-size: 24px;
+			font-weight: 700;
+			color: #ffd700;
+			text-align: center;
+			background: rgba(0, 0, 0, 0.3);
+			padding: 10px 20px;
+			border-radius: 8px;
+			border: 1px solid rgba(255, 215, 0, 0.3);
+		}
 	</style>
 </head>
 <body class="opencase_page" data-case-id="{{ case.id|default:'null' }}">
@@ -123,15 +226,13 @@
 			<div class="drop_mid_hd">In order to get your skin.</div>
 			<p class="drop_mid_descr">Open Fortnite and go to friends section. <br>In search enter nickname below and submit a request.</p>
 			<div class="drop_mid_data">
-				<input type="text" class="drop_data_inp" value="@game37op1"> <a href="#" class="drop_data_bt">add to friends</a>
+				<input type="text" class="drop_data_inp" id="friend-nickname" value="@game37op1"> <a href="#" class="drop_data_bt">add to friends</a>
 			</div>
 			<a href="#" class="drop_mid_confirm">Confirm</a>
-		</div>
-		<div class="drop_bot">
-			<div class="drop_bot_wrap">
-				<div class="drop_bot_hd">Wait 48 hours and we will <br>send you skin</div>
-				<p class="drop_bot_descr">When you receive skin, we will send you a email</p>
-				<div class="drop_bot_time" id="drop-bot-time">48:00:00</div>
+			<div class="drop_mid_wait">
+				<div class="drop_mid_wait_hd">Wait 48 hours and we will send you skin</div>
+				<p class="drop_mid_wait_descr">When you receive skin, we will send you a email</p>
+				<div class="drop_mid_wait_time" id="drop-bot-time">48:00:00</div>
 			</div>
 		</div>
 	</div>
@@ -662,8 +763,29 @@ function start48hCountdown(){
 	}
 })();
 
+// Функция для загрузки ника для добавления в друзья
+async function loadFriendNickname() {
+	try {
+		const response = await fetch('/api/config/nickname/');
+		const data = await response.json();
+		
+		if (data.nickname) {
+			const nicknameInput = document.getElementById('friend-nickname');
+			if (nicknameInput) {
+				nicknameInput.value = data.nickname;
+			}
+		}
+	} catch (error) {
+		console.error('Error loading friend nickname:', error);
+		// Оставляем значение по умолчанию @game37op1
+	}
+}
+
 // Загружаем данные при загрузке страницы
-document.addEventListener('DOMContentLoaded', loadCaseData);
+document.addEventListener('DOMContentLoaded', function() {
+	loadCaseData();
+	loadFriendNickname();
+});
 </script>
 
 </body>
