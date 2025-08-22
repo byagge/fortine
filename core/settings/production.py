@@ -9,9 +9,9 @@ DEBUG = True
 STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
 # SECURITY WARNING: define the correct hosts in production!
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "77.245.157.39", "fortcase.cc", "www.fortcase.cc"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "77.245.157.39"]
 
-CSRF_TRUSTED_ORIGINS = ["https://*.77.245.157.39", "https://*.fortcase.cc", "https://*.www.fortcase.cc"]
+CSRF_TRUSTED_ORIGINS = ["https://*.77.245.157.39"]
 
 SECRET_KEY = "django-insecure-%qhq!-y*-cl1*rda($hf)j+et+2*rkm&f$z5$!58erqv(92&cu"
 
