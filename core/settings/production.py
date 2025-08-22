@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = True
+DEBUG = False
 
 # ManifestStaticFilesStorage is recommended in production, to prevent
 # outdated JavaScript / CSS assets being served from cache
@@ -13,6 +13,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "77.245.157.39", "fortcase.cc", "www.
 
 CSRF_TRUSTED_ORIGINS = ["https://*.77.245.157.39", "https://*.fortcase.cc", "https://*.www.fortcase.cc"]
 
+SECRET_KEY = "q@fwqvk5y8st7#xt*85a9s=&nw0pf3wnhcp32sxqj)z-tuksg$"
 
 try:
     from .local import *
