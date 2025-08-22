@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "77.245.157.39", "fortcase.cc", "www.
 
 CSRF_TRUSTED_ORIGINS = ["https://*.77.245.157.39", "https://*.fortcase.cc", "https://*.www.fortcase.cc"]
 
-SECRET_KEY = "q@fwqvk5y8st7#xt*85a9s=&nw0pf3wnhcp32sxqj)z-tuksg$"
+SECRET_KEY = "django-insecure-%qhq!-y*-cl1*rda($hf)j+et+2*rkm&f$z5$!58erqv(92&cu"
 
 try:
     from .local import *
