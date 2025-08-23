@@ -73,14 +73,14 @@ header{
 	display: flex;
 	height: 100%;
 	align-items: center;
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: 600;
 	font-family: 'Octos';
 	text-transform: uppercase;
 	margin-right: 80px;
 }
 .logo img{
-	height: 22px;
+	height: 35px;
 	margin-right: 10px;
 }
 .menu_item{
@@ -1905,14 +1905,14 @@ body.menu-open {
 .mobile_logo {
 	display: flex;
 	align-items: center;
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: 600;
 	font-family: 'Octos';
 	text-transform: uppercase;
 }
 
 .mobile_logo img {
-	height: 22px;
+	height: 35px;
 	margin-right: 10px;
 }
 
@@ -2035,11 +2035,11 @@ body.menu-open {
 	}
 	
 	.mobile_logo {
-		font-size: 16px;
+		font-size: 18px;
 	}
 	
 	.mobile_logo img {
-		height: 20px;
+		height: 30px;
 	}
 }
 
@@ -2054,11 +2054,11 @@ body.menu-open {
 	}
 	
 	.mobile_logo {
-		font-size: 14px;
+		font-size: 16px;
 	}
 	
 	.mobile_logo img {
-		height: 18px;
+		height: 28px;
 		margin-right: 8px;
 	}
 	
